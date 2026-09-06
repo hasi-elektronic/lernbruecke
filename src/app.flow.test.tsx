@@ -13,9 +13,20 @@ function renderApp() {
   );
 }
 
-async function completeSetup(user: ReturnType<typeof userEvent.setup>) {
+async function completeSetup(user: ReturnType<typeof userEvent.setup>, turkishHelp = false) {
   await user.type(screen.getByPlaceholderText(/Zeyno/i), 'Zeyno');
+  if (turkishHelp) {
+    await user.click(screen.getByRole('checkbox', { name: /Türkische Hilfe/i }));
+  }
   await user.click(screen.getByRole('button', { name: /Los geht/i }));
+}
+
+async function openParentArea(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole('button', { name: /Eltern/i }));
+  const question = screen.getByText(/× .* = \?/).textContent ?? '';
+  const [a, b] = question.match(/\d+/g)?.map(Number) ?? [0, 0];
+  await user.type(screen.getByRole('textbox'), String(a * b));
+  await user.click(screen.getByRole('button', { name: 'Weiter' }));
 }
 
 /** Lektion A1: Schritt 1 „Markiere alle Äpfel" (3 Äpfel unter 6 Bildern). */
@@ -56,10 +67,39 @@ describe('App-Flows', () => {
     expect(screen.getByText('💡 Tipp')).toBeTruthy();
   });
 
+  it('zeigt bei deutscher Auswahl keine türkische Hilfe im Kinderbereich', async () => {
+    const user = userEvent.setup();
+    renderApp();
+    await completeSetup(user); // Deutsch, Haken nicht gesetzt
+    await user.click(screen.getByRole('button', { name: /Weiterlernen/i }));
+    expect(screen.queryByRole('button', { name: /Türkçe açıkla/i })).toBeNull();
+  });
+
+  it('setzt den Haken automatisch, wenn die Elternsprache Türkisch ist', async () => {
+    const user = userEvent.setup();
+    renderApp();
+    await user.click(screen.getByRole('button', { name: 'Türkçe' }));
+    const box = screen.getByRole('checkbox', { name: /Türkçe yardım/i }) as HTMLInputElement;
+    expect(box.checked).toBe(true);
+    await user.click(screen.getByRole('button', { name: 'Deutsch' }));
+    expect((screen.getByRole('checkbox', { name: /Türkische Hilfe/i }) as HTMLInputElement).checked).toBe(false);
+  });
+
+  it('schaltet die türkische Hilfe im Elternbereich nachträglich um', async () => {
+    const user = userEvent.setup();
+    renderApp();
+    await completeSetup(user); // ohne türkische Hilfe
+    await openParentArea(user);
+    await user.click(screen.getByRole('checkbox', { name: /Türkische Hilfe/i }));
+    await user.click(screen.getByRole('button', { name: /Zurück/i }));
+    await user.click(screen.getByRole('button', { name: /Weiterlernen/i }));
+    expect(screen.getByRole('button', { name: /Türkçe açıkla/i })).toBeTruthy();
+  });
+
   it('blendet die türkische Hilfe erst auf Wunsch ein', async () => {
     const user = userEvent.setup();
     renderApp();
-    await completeSetup(user);
+    await completeSetup(user, true);
     await user.click(screen.getByRole('button', { name: /Weiterlernen/i }));
 
     expect(screen.queryByText(/işaretlemek/i)).toBeNull();

@@ -15,6 +15,10 @@ const de = {
     avatarLabel: 'Figur auswählen',
     turkishHelpLabel: 'Türkische Hilfe im Kinderbereich anbieten',
     turkishHelpHint: 'Die Hilfe erscheint nur, wenn das Kind sie antippt.',
+    turkishHelpIndependent:
+      'Diese Einstellung gilt für den Kinderbereich und ist unabhängig von der Sprache dieser Oberfläche.',
+    turkishHelpOn: 'Türkische Hilfe ist eingeschaltet.',
+    turkishHelpOff: 'Türkische Hilfe ist ausgeschaltet. Das Kind sieht nur deutsche Texte.',
     storageNotice: 'Die Daten werden nur auf diesem Gerät gespeichert. Es gibt kein Konto und keine Cloud.',
     usageNotice:
       'Empfohlen sind kurze Einheiten von 5 bis 10 Minuten. Es gibt keine Tagesserie und keinen Zeitdruck.',
@@ -61,6 +65,10 @@ const tr = {
     avatarLabel: 'Avatar seçin',
     turkishHelpLabel: 'Çocuk bölümünde Türkçe yardım sunulsun',
     turkishHelpHint: 'Yardım yalnızca çocuk dokunduğunda görünür.',
+    turkishHelpIndependent:
+      'Bu ayar çocuk bölümü içindir ve bu arayüzün dilinden bağımsızdır.',
+    turkishHelpOn: 'Türkçe yardım açık.',
+    turkishHelpOff: 'Türkçe yardım kapalı. Çocuk yalnızca Almanca metin görür.',
     storageNotice: 'Veriler yalnızca bu cihazda saklanır. Hesap veya bulut yoktur.',
     usageNotice: 'Günde 5–10 dakikalık kısa çalışmalar önerilir. Gün serisi veya süre baskısı yoktur.',
     start: 'Başla',

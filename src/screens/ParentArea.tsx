@@ -62,7 +62,7 @@ function Bar({ ratio }: { ratio: number }) {
 }
 
 export function ParentDashboard({ onBack, onEditProfile }: { onBack: () => void; onEditProfile: () => void }) {
-  const { data, setSettings, exportJson, importJson, clearAll } = useAppState();
+  const { data, setSettings, setProfile, exportJson, importJson, clearAll } = useAppState();
   const lang = data.settings.parentLanguage;
   const s = t(lang);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -188,6 +188,25 @@ export function ParentDashboard({ onBack, onEditProfile }: { onBack: () => void;
               </button>
             ))}
           </div>
+          {data.profile ? (
+            <label className="flex items-start gap-3 rounded-2xl bg-sun-100 p-3">
+              <input
+                type="checkbox"
+                checked={data.profile.turkishHelp}
+                onChange={(e) =>
+                  data.profile && setProfile({ ...data.profile, turkishHelp: e.target.checked })
+                }
+                className="mt-1 h-6 w-6 accent-[#33afe2]"
+              />
+              <span>
+                <span className="block text-base font-bold text-ink-900">{s.turkishHelpLabel}</span>
+                <span className="block text-sm text-ink-700">
+                  {data.profile.turkishHelp ? s.turkishHelpOn : s.turkishHelpOff}
+                </span>
+                <span className="mt-1 block text-sm text-ink-700">{s.turkishHelpIndependent}</span>
+              </span>
+            </label>
+          ) : null}
           <label className="flex items-center gap-3 rounded-2xl bg-white p-3">
             <input
               type="checkbox"

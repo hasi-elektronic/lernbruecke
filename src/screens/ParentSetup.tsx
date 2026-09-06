@@ -10,7 +10,11 @@ export function ParentSetup({ onDone }: { onDone: () => void }) {
   const [lang, setLang] = useState<UiLanguage>(data.settings.parentLanguage);
   const [nickname, setNickname] = useState(data.profile?.nickname ?? '');
   const [avatar, setAvatar] = useState(data.profile?.avatar ?? AVATARS[0]);
-  const [turkishHelp, setTurkishHelp] = useState(data.profile?.turkishHelp ?? true);
+  const [turkishHelp, setTurkishHelp] = useState(
+    data.profile?.turkishHelp ?? data.settings.parentLanguage === 'tr',
+  );
+  // Sobald der Haken einmal bewusst gesetzt wurde, überschreibt die Sprachwahl ihn nicht mehr.
+  const [helpTouched, setHelpTouched] = useState(data.profile !== null);
   const s = t(lang);
 
   const save = () => {
@@ -42,7 +46,10 @@ export function ParentSetup({ onDone }: { onDone: () => void }) {
               <button
                 key={l}
                 type="button"
-                onClick={() => setLang(l)}
+                onClick={() => {
+                  setLang(l);
+                  if (!helpTouched) setTurkishHelp(l === 'tr');
+                }}
                 aria-pressed={lang === l}
                 className={`lb-tile flex-1 py-3 ${lang === l ? 'border-brand-400 bg-brand-50' : 'border-brand-100'}`}
               >
@@ -85,12 +92,16 @@ export function ParentSetup({ onDone }: { onDone: () => void }) {
           <input
             type="checkbox"
             checked={turkishHelp}
-            onChange={(e) => setTurkishHelp(e.target.checked)}
+            onChange={(e) => {
+              setTurkishHelp(e.target.checked);
+              setHelpTouched(true);
+            }}
             className="mt-1 h-6 w-6 accent-[#33afe2]"
           />
           <span>
             <span className="block text-base font-bold text-ink-900">{s.turkishHelpLabel}</span>
             <span className="block text-sm text-ink-700">{s.turkishHelpHint}</span>
+            <span className="mt-1 block text-sm text-ink-700">{s.turkishHelpIndependent}</span>
           </span>
         </label>
 
