@@ -198,6 +198,25 @@ describe('App-Flows', () => {
     expect(screen.getByText(/significa marcar todos/i)).toBeTruthy();
   });
 
+  it('lässt beide Content-Packs jederzeit im Elternbereich umschalten', async () => {
+    const user = userEvent.setup();
+    renderApp();
+    await completeSetup(user, 'Türkçe'); // Start: deutsches Pack mit türkischer Hilfe
+    await openParentArea(user);
+
+    const packBox = screen.getByRole('group', { name: /Sprache der Aufgaben/i });
+    // Beide Packs stehen unabhängig vom Standort zur Auswahl.
+    expect(within(packBox).getByRole('button', { name: /Deutsch/ })).toBeTruthy();
+    await user.click(within(packBox).getByRole('button', { name: /English \(US\)/ }));
+
+    await user.click(screen.getByRole('button', { name: /Zurück/i }));
+    expect(screen.getByRole('button', { name: /Keep learning/i })).toBeTruthy();
+    await user.click(screen.getByRole('button', { name: /Keep learning/i }));
+    expect(screen.getByText('Circle all the apples.')).toBeTruthy();
+    // Türkisch gibt es im US-Pack nicht, also wurde die Hilfssprache zurückgesetzt.
+    expect(screen.queryByRole('button', { name: /Türkçe/ })).toBeNull();
+  });
+
   it('stellt den Fortschritt nach einem Neustart wieder her', async () => {
     const user = userEvent.setup();
     renderApp();

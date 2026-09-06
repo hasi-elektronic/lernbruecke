@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
-import { getPack, getSkill } from '../content';
+import { getPack, getSkill, packList } from '../content';
 import { buildParentAdvice, completedLessonIds, hintUsageRate, skillStats } from '../logic/progress';
 import { t, uiLanguages } from '../i18n/strings';
 import { useAppState } from '../state';
@@ -190,6 +190,36 @@ export function ParentDashboard({ onBack, onEditProfile }: { onBack: () => void;
               </button>
             ))}
           </div>
+          <fieldset className="rounded-2xl bg-brand-50 p-3">
+            <legend className="text-base font-bold text-ink-900">{s.targetLabel}</legend>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {packList.map((p) => (
+                <button
+                  key={p.targetLocale}
+                  type="button"
+                  onClick={() => {
+                    setSettings({ ...data.settings, targetLocale: p.targetLocale });
+                    // Hilfssprache zurücksetzen, wenn sie im neuen Pack nicht vorliegt.
+                    if (
+                      data.profile &&
+                      data.profile.supportLanguage &&
+                      !p.supportLanguages.includes(data.profile.supportLanguage)
+                    ) {
+                      setProfile({ ...data.profile, supportLanguage: null });
+                    }
+                  }}
+                  aria-pressed={data.settings.targetLocale === p.targetLocale}
+                  className={`lb-tile px-3 py-2 ${data.settings.targetLocale === p.targetLocale ? 'border-brand-400 bg-white' : 'border-white bg-white/60'}`}
+                >
+                  <span className="text-sm font-bold">
+                    {p.flag} {p.nativeLabel}
+                  </span>
+                </button>
+              ))}
+            </div>
+            <p className="mt-2 text-sm text-ink-700">{s.targetHint}</p>
+          </fieldset>
+
           {data.profile ? (
             <fieldset className="rounded-2xl bg-sun-100 p-3">
               <legend className="text-base font-bold text-ink-900">{s.supportLabel}</legend>
