@@ -1,24 +1,25 @@
-import type { LearningModule, Lesson, SkillInfo } from '../types/content';
+import type { ContentPack, LearningModule, Lesson, SkillInfo, TargetLocale } from '../types/content';
 import { moduleALessons } from './moduleA';
 import { moduleBLessons } from './moduleB';
 import { moduleCLessons } from './moduleC';
 import { moduleDLessons } from './moduleD';
+import { usPack } from './us';
 
-export const modules: LearningModule[] = [
+const modules: LearningModule[] = [
   { id: 'A', title: 'Aufgaben verstehen', subtitle: 'markieren · auswählen · zuordnen', emoji: '🔍', tone: 'brand' },
   { id: 'B', title: 'Dazu und weg', subtitle: 'mehr werden · weniger werden', emoji: '🍪', tone: 'turq' },
   { id: 'C', title: 'Vergleichen', subtitle: 'mehr · weniger · Unterschied', emoji: '⚖️', tone: 'sun' },
   { id: 'D', title: 'Was ist gefragt?', subtitle: 'Frage · Zahlen · Bild', emoji: '💡', tone: 'ink' },
 ];
 
-export const lessons: Lesson[] = [
+const lessons: Lesson[] = [
   ...moduleALessons,
   ...moduleBLessons,
   ...moduleCLessons,
   ...moduleDLessons,
 ];
 
-export const skills: SkillInfo[] = [
+const skills: SkillInfo[] = [
   { id: 'anweisung-markieren', label: { de: 'Markieren verstehen', en: 'Understanding „mark all"', es: 'Entender „marcar todo"' } },
   { id: 'anweisung-auswaehlen', label: { de: 'Auswählen verstehen', en: 'Understanding „choose one"', es: 'Entender „elegir uno"' } },
   { id: 'anweisung-zuordnen', label: { de: 'Zuordnen verstehen', en: 'Understanding „sort into groups"', es: 'Entender „clasificar"' } },
@@ -33,17 +34,41 @@ export const skills: SkillInfo[] = [
   { id: 'modell-waehlen', label: { de: 'Passendes Bild wählen', en: 'Choosing the right model', es: 'Elegir el modelo correcto' } },
 ];
 
-export function getLesson(id: string): Lesson | undefined {
-  return lessons.find((l) => l.id === id);
+export const dePack: ContentPack = {
+  targetLocale: 'de-DE',
+  nativeLabel: 'Deutsch',
+  flag: '🇩🇪',
+  speechLang: 'de-DE',
+  modules,
+  lessons,
+  skills,
+  supportLanguages: ['tr', 'es', 'en'],
+};
+
+export const contentPacks: Record<TargetLocale, ContentPack> = {
+  'de-DE': dePack,
+  'en-US': usPack,
+};
+
+export const packList: ContentPack[] = [dePack, usPack];
+
+export function getPack(locale: TargetLocale): ContentPack {
+  return contentPacks[locale] ?? dePack;
 }
 
-export function lessonsOfModule(moduleId: LearningModule['id']): Lesson[] {
-  return lessons.filter((l) => l.moduleId === moduleId);
+export function getLesson(pack: ContentPack, id: string): Lesson | undefined {
+  return pack.lessons.find((l) => l.id === id);
 }
 
-export function getSkill(id: string): SkillInfo | undefined {
-  return skills.find((s) => s.id === id);
+export function lessonsOfModule(pack: ContentPack, moduleId: LearningModule['id']): Lesson[] {
+  return pack.lessons.filter((l) => l.moduleId === moduleId);
 }
 
-/** Reihenfolge, in der Lektionen empfohlen werden. */
-export const lessonOrder: string[] = lessons.map((l) => l.id);
+export function getSkill(pack: ContentPack, id: string): SkillInfo | undefined {
+  return pack.skills.find((s) => s.id === id);
+}
+
+/** Reihenfolge, in der Lektionen innerhalb eines Packs empfohlen werden. */
+export function lessonOrder(pack: ContentPack): string[] {
+  return pack.lessons.map((l) => l.id);
+}

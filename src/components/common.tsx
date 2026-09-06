@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react';
-import { cancelSpeech, hasVoiceFor, onVoicesReady, speak } from '../audio/speech';
+import { cancelSpeech, hasVoiceFor, onVoicesReady, speak, type SpeechLang } from '../audio/speech';
 import type { SceneGroup } from '../types/content';
 
 export function SpeakButton({
   text,
   lang = 'de-DE',
   enabled,
-  label = 'Vorlesen',
+  strings,
 }: {
   text: string;
-  lang?: 'de-DE' | 'tr-TR';
+  lang?: SpeechLang;
   enabled: boolean;
-  label?: string;
+  strings: { readAloud: string; slow: string; noSpeech: string };
 }) {
   const [voiceReady, setVoiceReady] = useState(false);
 
@@ -24,13 +24,7 @@ export function SpeakButton({
   useEffect(() => () => cancelSpeech(), []);
 
   if (!enabled || !voiceReady) {
-    return (
-      <p className="text-sm text-ink-700/70">
-        {lang === 'de-DE'
-          ? 'Kein Vorlesen möglich – du kannst den Text lesen.'
-          : 'Sesli okuma yok – metni okuyabilirsin.'}
-      </p>
-    );
+    return <p className="text-sm text-ink-700/70">{strings.noSpeech}</p>;
   }
 
   return (
@@ -40,14 +34,14 @@ export function SpeakButton({
         className="focus-ring rounded-2xl bg-brand-100 px-4 py-3 text-base font-bold text-brand-800 hover:bg-brand-200"
         onClick={() => speak(text, { lang })}
       >
-        🔊 {label}
+        🔊 {strings.readAloud}
       </button>
       <button
         type="button"
         className="focus-ring rounded-2xl bg-brand-50 px-4 py-3 text-base font-bold text-brand-700 hover:bg-brand-100"
         onClick={() => speak(text, { lang, slow: true })}
       >
-        🐢 {lang === 'de-DE' ? 'Langsam' : 'Yavaş'}
+        🐢 {strings.slow}
       </button>
     </div>
   );

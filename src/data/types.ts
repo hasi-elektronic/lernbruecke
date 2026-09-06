@@ -1,4 +1,4 @@
-import type { SupportLanguage } from '../types/content';
+import type { SupportLanguage, TargetLocale } from '../types/content';
 
 /** Sprache der Elternoberfläche. */
 export type UiLanguage = 'de' | 'en' | 'es';
@@ -14,6 +14,8 @@ export interface ChildProfile {
 export interface Settings {
   /** Sprache der Elternoberfläche. */
   parentLanguage: UiLanguage;
+  /** Sprache, in der die Aufgaben gestellt sind (= gewähltes Content-Pack). */
+  targetLocale: TargetLocale;
   reducedMotion: boolean;
   soundEnabled: boolean;
 }
@@ -56,6 +58,7 @@ export interface AppData {
 
 export const defaultSettings: Settings = {
   parentLanguage: 'de',
+  targetLocale: 'de-DE',
   reducedMotion: false,
   soundEnabled: true,
 };

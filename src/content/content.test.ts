@@ -1,36 +1,48 @@
 import { describe, expect, it } from 'vitest';
-import { lessons, lessonsOfModule, modules, skills } from './index';
-import { supportLanguages, supportPacks } from './support';
+import { lessonsOfModule, packList } from './index';
+import { supportLanguagesFor, supportPacks } from './support';
+import type { ContentPack } from '../types/content';
 import type { Exercise } from '../types/content';
 
-function allExercises(): Exercise[] {
-  return lessons.flatMap((l) => [...l.steps, l.transferTask]);
+function exercisesOf(pack: ContentPack): Exercise[] {
+  return pack.lessons.flatMap((l) => [...l.steps, l.transferTask]);
 }
 
+function allExercises(): Exercise[] {
+  return packList.flatMap(exercisesOf);
+}
+
+const allLessons = packList.flatMap((p) => p.lessons);
+
 describe('Lektionsbestand', () => {
-  it('enthält 12 Lektionen, 3 je Modul', () => {
-    expect(lessons).toHaveLength(12);
-    for (const m of modules) {
-      expect(lessonsOfModule(m.id)).toHaveLength(3);
+  it('enthält je Pack 12 Lektionen, 3 pro Modul', () => {
+    expect(packList.length).toBeGreaterThanOrEqual(2);
+    for (const pack of packList) {
+      expect(pack.lessons, pack.targetLocale).toHaveLength(12);
+      for (const m of pack.modules) {
+        expect(lessonsOfModule(pack, m.id), `${pack.targetLocale}/${m.id}`).toHaveLength(3);
+      }
     }
   });
 
   it('hat eindeutige Lektions- und Übungs-IDs', () => {
-    const lessonIds = lessons.map((l) => l.id);
+    const lessonIds = allLessons.map((l) => l.id);
     expect(new Set(lessonIds).size).toBe(lessonIds.length);
     const exerciseIds = allExercises().map((e) => e.id);
     expect(new Set(exerciseIds).size).toBe(exerciseIds.length);
   });
 
-  it('nutzt nur registrierte Skills', () => {
-    const known = new Set(skills.map((s) => s.id));
-    for (const lesson of lessons) {
-      expect(known.has(lesson.skillId)).toBe(true);
+  it('nutzt nur Skills, die im eigenen Pack registriert sind', () => {
+    for (const pack of packList) {
+      const known = new Set(pack.skills.map((s) => s.id));
+      for (const lesson of pack.lessons) {
+        expect(known.has(lesson.skillId), `${pack.targetLocale}: ${lesson.skillId}`).toBe(true);
+      }
     }
   });
 
   it('hat je Lektion mindestens zwei Übungen plus Kontrollaufgabe', () => {
-    for (const lesson of lessons) {
+    for (const lesson of allLessons) {
       expect(lesson.steps.length).toBeGreaterThanOrEqual(2);
       expect(lesson.transferTask).toBeTruthy();
       expect(lesson.title.length).toBeGreaterThan(3);
@@ -50,25 +62,29 @@ describe('Lektionsbestand', () => {
 });
 
 describe('Hilfssprachen', () => {
-  it('deckt jede Übung in jeder angebotenen Sprache ab', () => {
-    const ids = allExercises().map((e) => e.id);
-    for (const lang of supportLanguages) {
-      const pack = supportPacks[lang.id];
-      expect(pack, `Pack fehlt: ${lang.id}`).toBeTruthy();
-      for (const id of ids) {
-        const entry = pack?.[id];
-        expect(entry, `${lang.id} fehlt für ${id}`).toBeTruthy();
-        expect(entry?.hint.trim().length).toBeGreaterThan(3);
-        expect(entry?.explanation.trim().length).toBeGreaterThan(3);
+  it('deckt jede Übung in allen Sprachen ab, die das Pack anbietet', () => {
+    for (const pack of packList) {
+      const ids = exercisesOf(pack).map((e) => e.id);
+      const langs = supportLanguagesFor(pack.supportLanguages);
+      expect(langs.length, `${pack.targetLocale} ohne Hilfssprache`).toBeGreaterThan(0);
+      for (const lang of langs) {
+        const dict = supportPacks[lang.id];
+        expect(dict, `Sprachdatei fehlt: ${lang.id}`).toBeTruthy();
+        for (const id of ids) {
+          const entry = dict?.[id];
+          expect(entry, `${lang.id} fehlt für ${id}`).toBeTruthy();
+          expect(entry?.hint.trim().length).toBeGreaterThan(3);
+          expect(entry?.explanation.trim().length).toBeGreaterThan(3);
+        }
       }
     }
   });
 
   it('enthält keine verwaisten Einträge', () => {
     const ids = new Set(allExercises().map((e) => e.id));
-    for (const lang of supportLanguages) {
-      for (const key of Object.keys(supportPacks[lang.id] ?? {})) {
-        expect(ids.has(key), `${lang.id}: unbekannte Übung ${key}`).toBe(true);
+    for (const lang of ['tr', 'es', 'en'] as const) {
+      for (const key of Object.keys(supportPacks[lang] ?? {})) {
+        expect(ids.has(key), `${lang}: unbekannte Übung ${key}`).toBe(true);
       }
     }
   });
@@ -126,7 +142,7 @@ describe('Lösungen sind konsistent', () => {
   });
 
   it('nutzt in der Kontrollaufgabe einen anderen Kontext als in den Übungen', () => {
-    for (const lesson of lessons) {
+    for (const lesson of allLessons) {
       const stepTexts = lesson.steps.map((s) => `${s.context ?? ''}${s.instruction}`);
       const transferText = `${lesson.transferTask.context ?? ''}${lesson.transferTask.instruction}`;
       expect(stepTexts).not.toContain(transferText);

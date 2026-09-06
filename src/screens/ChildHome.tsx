@@ -1,6 +1,7 @@
-import { lessons, lessonsOfModule, modules } from '../content';
+import { getPack, lessonsOfModule } from '../content';
 import { completedLessonIds, recommendNextLesson } from '../logic/progress';
 import { useAppState } from '../state';
+import { childT } from '../content/childStrings';
 
 const toneClasses: Record<string, string> = {
   brand: 'border-brand-300 bg-brand-50',
@@ -17,8 +18,10 @@ export function ChildHome({
   onParentArea: () => void;
 }) {
   const { data } = useAppState();
+  const pack = getPack(data.settings.targetLocale);
+  const c = childT(pack.targetLocale);
   const done = new Set(completedLessonIds(data.completions));
-  const recommendation = recommendNextLesson(data.attempts, data.completions);
+  const recommendation = recommendNextLesson(pack, data.attempts, data.completions);
   const name = data.profile?.nickname ?? '';
 
   return (
@@ -28,24 +31,24 @@ export function ChildHome({
           <span className="text-4xl" aria-hidden="true">
             {data.profile?.avatar}
           </span>
-          <h1 className="text-2xl font-extrabold text-ink-900">Hallo, {name}!</h1>
+          <h1 className="text-2xl font-extrabold text-ink-900">{c.greeting}, {name}!</h1>
         </div>
         <button
           type="button"
           onClick={onParentArea}
           className="focus-ring rounded-2xl bg-white px-4 py-3 text-sm font-bold text-brand-700 shadow-sm"
         >
-          👤 Eltern
+          👤 {c.parents}
         </button>
       </header>
 
       <section className="lb-card mb-6 p-5">
         <p className="text-base font-bold text-brand-700">
           {recommendation.reason === 'repeat-weak'
-            ? 'Das üben wir noch einmal:'
+            ? c.repeatTask
             : recommendation.reason === 'free-repeat'
-              ? 'Du hast alles geschafft! Noch einmal üben:'
-              : 'Deine nächste Aufgabe:'}
+              ? c.allDone
+              : c.nextTask}
         </p>
         <h2 className="mt-1 text-2xl font-extrabold text-ink-900">{recommendation.lesson.title}</h2>
         <p className="mt-1 text-base text-ink-700">{recommendation.lesson.objective}</p>
@@ -54,16 +57,16 @@ export function ChildHome({
           onClick={() => onStartLesson(recommendation.lesson.id)}
           className="lb-btn-primary mt-4 w-full text-xl"
         >
-          ▶︎ Weiterlernen
+          ▶︎ {c.continueLearning}
         </button>
         <p className="mt-3 text-sm text-ink-700">
-          Geschafft: {done.size} von {lessons.length} Lektionen
+          {c.progressOf.replace('{done}', String(done.size)).replace('{total}', String(pack.lessons.length))}
         </p>
       </section>
 
-      <h2 className="mb-3 text-xl font-extrabold text-ink-900">Deine Lernorte</h2>
+      <h2 className="mb-3 text-xl font-extrabold text-ink-900">{c.yourPlaces}</h2>
       <div className="grid gap-4 sm:grid-cols-2">
-        {modules.map((m) => (
+        {pack.modules.map((m) => (
           <section key={m.id} className={`rounded-3xl border-4 p-4 ${toneClasses[m.tone]}`}>
             <p className="text-3xl" aria-hidden="true">
               {m.emoji}
@@ -71,7 +74,7 @@ export function ChildHome({
             <h3 className="mt-1 text-lg font-extrabold text-ink-900">{m.title}</h3>
             <p className="text-sm text-ink-700">{m.subtitle}</p>
             <ul className="mt-3 space-y-2">
-              {lessonsOfModule(m.id).map((lesson) => {
+              {lessonsOfModule(pack, m.id).map((lesson) => {
                 const isDone = done.has(lesson.id);
                 const isNext = recommendation.lesson.id === lesson.id;
                 return (
@@ -89,7 +92,7 @@ export function ChildHome({
                       <span className="flex-1">
                         <span className="block text-base font-bold text-ink-900">{lesson.title}</span>
                         <span className="block text-xs font-bold uppercase tracking-wide text-ink-700/70">
-                          {isDone ? 'geschafft' : isNext ? 'als Nächstes' : 'offen'}
+                          {isDone ? c.done : isNext ? c.next : c.open}
                         </span>
                       </span>
                     </button>

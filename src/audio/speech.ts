@@ -8,7 +8,7 @@
  * - Kein Mikrofon, keine Aufnahme.
  */
 
-export type SpeechLang = 'de-DE' | 'tr-TR';
+export type SpeechLang = 'de-DE' | 'en-US' | 'tr-TR' | 'es-ES';
 
 function synth(): SpeechSynthesis | null {
   if (typeof window === 'undefined') return null;

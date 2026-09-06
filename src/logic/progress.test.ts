@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildParentAdvice, hintUsageRate, recommendNextLesson, skillStats } from './progress';
 import type { AttemptRecord, LessonCompletion } from '../data/types';
-import { lessons } from '../content';
+import { dePack } from '../content';
 
 function attempt(partial: Partial<AttemptRecord>): AttemptRecord {
   return {
@@ -55,13 +55,14 @@ describe('skillStats', () => {
 
 describe('recommendNextLesson', () => {
   it('startet mit der ersten Lektion, wenn nichts gelernt wurde', () => {
-    const rec = recommendNextLesson([], []);
-    expect(rec.lesson.id).toBe(lessons[0].id);
+    const rec = recommendNextLesson(dePack, [], []);
+    expect(rec.lesson.id).toBe(dePack.lessons[0].id);
     expect(rec.reason).toBe('next-new');
   });
 
   it('geht zur nächsten neuen Lektion, wenn die vorige stark war', () => {
     const rec = recommendNextLesson(
+      dePack,
       [attempt({}), attempt({ exerciseId: 'a1-t', isTransfer: true })],
       [completion({})],
     );
@@ -71,6 +72,7 @@ describe('recommendNextLesson', () => {
 
   it('empfiehlt die Wiederholung, wenn die Kontrollaufgabe nicht saß', () => {
     const rec = recommendNextLesson(
+      dePack,
       [attempt({}), attempt({ exerciseId: 'a1-t', isTransfer: true, correctFirstTry: false, hintsUsed: 1 })],
       [completion({ transferFirstTryCorrect: false })],
     );
@@ -84,7 +86,7 @@ describe('recommendNextLesson', () => {
       attempt({ correctFirstTry: false, hintsUsed: 1 }),
       attempt({ correctFirstTry: true }),
     ];
-    const rec = recommendNextLesson(weak, [completion({ transferFirstTryCorrect: true })]);
+    const rec = recommendNextLesson(dePack, weak, [completion({ transferFirstTryCorrect: true })]);
     expect(rec.lesson.id).toBe('a1');
     expect(rec.reason).toBe('repeat-weak');
   });

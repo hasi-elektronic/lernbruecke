@@ -88,7 +88,20 @@ getrennt. Ein späterer Serverzugriff ersetzt nur `data/`.
 
 ---
 
-## Inhalt: 4 Bereiche, 12 Lektionen
+## Content-Packs
+
+| Pack | Zielgruppe | Lektionen | Hilfssprachen |
+|---|---|---|---|
+| `de-DE` | 2. Klasse in Deutschland | 12 | Türkisch, Spanisch, Englisch |
+| `en-US` | 2nd grade in den USA | 12 | Spanisch |
+
+Beide Packs nutzen denselben Motor und dieselbe Fähigkeitsstruktur, haben aber
+eigene Aufgaben, eigene Kontexte und eigene Klassenzimmersprache
+(„markiere alle" ↔ „circle all"). Ein neues Pack ist reine Datenarbeit:
+`src/content/<locale>/` anlegen, in `contentPacks` eintragen, Hilfssprache
+hinterlegen — der Inhaltstest erzwingt Vollständigkeit.
+
+## Inhalt je Pack: 4 Bereiche, 12 Lektionen
 
 | Modul | Thema | Lektionen |
 |---|---|---|
@@ -108,9 +121,12 @@ jede Aufgabe die Handlung („Ben bekommt 3 Murmeln, Minas Menge wird kleiner").
 
 | Ebene | Wo eingestellt | Aktuell |
 |---|---|---|
-| **Zielsprache** (Sprache der Aufgaben) | Content-Pack, `targetLocale` | `de-DE` |
-| **Hilfssprache** (Heimatsprache) | Elternbereich, pro Kind | `tr`, `es`, `en` oder keine |
+| **Zielsprache** (Sprache der Aufgaben) | Content-Pack, `targetLocale` | `de-DE` und `en-US` |
+| **Hilfssprache** (Heimatsprache) | Elternbereich, pro Kind | de-DE: `tr`/`es`/`en`, en-US: `es`, oder keine |
 | **Elternoberfläche** | Elternbereich | `de`, `en`, `es` |
+
+Der Kinderbereich läuft **komplett** in der Zielsprache: Wer das US-Pack wählt,
+bekommt englische Aufgaben, englische Knöpfe und eine englische Sprachausgabe.
 
 Diese drei sind bewusst unabhängig: Eine Familie kann die Elternoberfläche auf
 Englisch stellen und dem Kind trotzdem spanische Hilfe geben, während die

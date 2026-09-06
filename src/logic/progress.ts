@@ -1,6 +1,6 @@
 import type { AttemptRecord, LessonCompletion, UiLanguage } from '../data/types';
-import { lessonOrder, lessons } from '../content';
-import type { Lesson } from '../types/content';
+import { lessonOrder } from '../content';
+import type { ContentPack, Lesson } from '../types/content';
 
 export interface SkillStat {
   skillId: string;
@@ -79,13 +79,16 @@ const WEAK_THRESHOLD = 0.6;
  *    schwächsten Quote als freie Wiederholung vorgeschlagen.
  */
 export function recommendNextLesson(
+  pack: ContentPack,
   attempts: AttemptRecord[],
   completions: LessonCompletion[],
 ): { lesson: Lesson; reason: 'repeat-weak' | 'next-new' | 'free-repeat' } {
+  const lessons = pack.lessons;
+  const order = lessonOrder(pack);
   const stats = new Map(skillStats(attempts).map((s) => [s.skillId, s]));
   const done = new Set(completedLessonIds(completions));
 
-  for (const id of lessonOrder) {
+  for (const id of order) {
     if (!done.has(id)) continue;
     const lesson = lessons.find((l) => l.id === id);
     if (!lesson) continue;
@@ -98,7 +101,7 @@ export function recommendNextLesson(
     }
   }
 
-  for (const id of lessonOrder) {
+  for (const id of order) {
     if (!done.has(id)) {
       const lesson = lessons.find((l) => l.id === id);
       if (lesson) return { lesson, reason: 'next-new' };

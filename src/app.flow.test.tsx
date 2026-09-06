@@ -165,6 +165,39 @@ describe('App-Flows', () => {
     expect(screen.getByText('Geschafft: 1 von 12 Lektionen')).toBeTruthy();
   });
 
+  it('spielt das US-Pack komplett in englischer Oberfläche', async () => {
+    const user = userEvent.setup();
+    renderApp();
+    await user.click(screen.getByRole('button', { name: /English \(US\)/ }));
+    await user.type(screen.getByPlaceholderText(/Zeyno/i), 'Mia');
+    await user.click(screen.getByRole('button', { name: /Los geht/i }));
+
+    // Kinderbereich läuft jetzt komplett auf Englisch
+    expect(screen.getByText('Hi, Mia!')).toBeTruthy();
+    await user.click(screen.getByRole('button', { name: /Keep learning/i }));
+    expect(screen.getByText('Circle all the apples.')).toBeTruthy();
+
+    // falsche Antwort -> englische Begründung
+    await user.click(screen.getAllByRole('button', { name: 'pear' })[0]);
+    await user.click(screen.getByRole('button', { name: 'Done' }));
+    expect(screen.getByText(/Something wrong is marked/i)).toBeTruthy();
+  });
+
+  it('bietet im US-Pack spanische Hilfe an, aber kein Türkisch', async () => {
+    const user = userEvent.setup();
+    renderApp();
+    await user.click(screen.getByRole('button', { name: /English \(US\)/ }));
+    const supportBox = screen.getByRole('group', { name: /Sprache der Hilfe/i });
+    // Türkisch ist für das US-Pack nicht hinterlegt und wird gar nicht angeboten
+    expect(within(supportBox).queryByRole('button', { name: /Türkçe/ })).toBeNull();
+    await user.click(within(supportBox).getByRole('button', { name: /Español/ }));
+    await user.type(screen.getByPlaceholderText(/Zeyno/i), 'Mia');
+    await user.click(screen.getByRole('button', { name: /Los geht/i }));
+    await user.click(screen.getByRole('button', { name: /Keep learning/i }));
+    await user.click(screen.getByRole('button', { name: /Español/ }));
+    expect(screen.getByText(/significa marcar todos/i)).toBeTruthy();
+  });
+
   it('stellt den Fortschritt nach einem Neustart wieder her', async () => {
     const user = userEvent.setup();
     renderApp();

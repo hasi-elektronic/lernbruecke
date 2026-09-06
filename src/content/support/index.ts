@@ -1,31 +1,38 @@
-import type { SupportLanguage, SupportPack, SupportEntry } from '../../types/content';
+import type { SupportEntry, SupportLanguage, SupportPack } from '../../types/content';
 import { supportTr } from './tr';
 import { supportEs } from './es';
 import { supportEn } from './en';
+import { usSupportEs } from './us-es';
 
 /**
- * Registry der Verständnishilfen. Eine weitere Sprache (z. B. Arabisch)
- * bedeutet: neue Datei anlegen, hier eintragen, fertig — kein Code im
- * Lektionsmotor ändert sich.
+ * Registry der Verständnishilfen, gemeinsam für alle Content-Packs.
+ * Die Übungs-IDs sind global eindeutig (deutsche Lektionen a1…, US-Lektionen ua1…),
+ * deshalb reicht eine Ebene je Sprache.
+ *
+ * Neue Sprache = neue Datei + Eintrag hier. Kein Code im Lektionsmotor ändert sich.
  */
 export const supportPacks: Partial<Record<SupportLanguage, SupportPack>> = {
   tr: supportTr,
-  es: supportEs,
+  es: { ...supportEs, ...usSupportEs },
   en: supportEn,
 };
 
 export interface SupportLanguageInfo {
   id: SupportLanguage;
-  /** Bezeichnung in der Sprache selbst. */
   nativeLabel: string;
   flag: string;
 }
 
-export const supportLanguages: SupportLanguageInfo[] = [
+const allSupportLanguages: SupportLanguageInfo[] = [
   { id: 'tr', nativeLabel: 'Türkçe', flag: '🇹🇷' },
   { id: 'es', nativeLabel: 'Español', flag: '🇪🇸' },
   { id: 'en', nativeLabel: 'English', flag: '🇬🇧' },
 ];
+
+/** Nur die Sprachen, die für dieses Pack vollständig vorliegen. */
+export function supportLanguagesFor(available: SupportLanguage[]): SupportLanguageInfo[] {
+  return allSupportLanguages.filter((l) => available.includes(l.id));
+}
 
 export function getSupport(lang: SupportLanguage | null, exerciseId: string): SupportEntry | null {
   if (!lang) return null;
@@ -33,5 +40,5 @@ export function getSupport(lang: SupportLanguage | null, exerciseId: string): Su
 }
 
 export function supportLanguageInfo(lang: SupportLanguage): SupportLanguageInfo | undefined {
-  return supportLanguages.find((l) => l.id === lang);
+  return allSupportLanguages.find((l) => l.id === lang);
 }

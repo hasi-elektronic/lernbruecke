@@ -51,6 +51,7 @@ export function createBrowserStore(): KeyValueStore {
 
 const ALLOWED_SUPPORT = ['tr', 'es', 'en', 'de'];
 const ALLOWED_UI = ['de', 'en', 'es'];
+const ALLOWED_LOCALE = ['de-DE', 'en-US'];
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -80,6 +81,9 @@ function sanitizeSettings(raw: unknown): Settings {
       ? (raw.parentLanguage as Settings['parentLanguage'])
       // v1 kannte 'tr' als Oberflächensprache; das gibt es nicht mehr.
       : 'de',
+    targetLocale: ALLOWED_LOCALE.includes(raw.targetLocale as string)
+      ? (raw.targetLocale as Settings['targetLocale'])
+      : 'de-DE',
     reducedMotion: raw.reducedMotion === true,
     soundEnabled: raw.soundEnabled !== false,
   };

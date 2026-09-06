@@ -126,6 +126,21 @@ export interface SupportEntry {
 /** exerciseId -> Hilfstext. Eine neue Sprache ist reine Datenarbeit. */
 export type SupportPack = Record<string, SupportEntry>;
 
+/** Ein Content-Pack = eine Zielsprache mit eigenen Modulen und Lektionen. */
+export interface ContentPack {
+  targetLocale: TargetLocale;
+  /** Bezeichnung für die Elternauswahl, in der Sprache selbst. */
+  nativeLabel: string;
+  flag: string;
+  /** Sprache für die Sprachausgabe im Kinderbereich. */
+  speechLang: string;
+  modules: LearningModule[];
+  lessons: Lesson[];
+  skills: SkillInfo[];
+  /** Hilfssprachen, die für dieses Pack vollständig vorliegen. */
+  supportLanguages: SupportLanguage[];
+}
+
 export interface LearningModule {
   id: ModuleId;
   title: string;

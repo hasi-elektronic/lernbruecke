@@ -3,7 +3,8 @@ import { useAppState } from '../state';
 import { t, uiLanguages } from '../i18n/strings';
 import type { UiLanguage } from '../data/types';
 import type { SupportLanguage } from '../types/content';
-import { supportLanguages } from '../content/support';
+import { supportLanguagesFor } from '../content/support';
+import { packList } from '../content';
 
 const AVATARS = ['🦊', '🐼', '🐢', '🦉', '🐙', '🦁', '🐝', '🐬'];
 
@@ -15,12 +16,15 @@ export function ParentSetup({ onDone }: { onDone: () => void }) {
   const [supportLanguage, setSupportLanguage] = useState<SupportLanguage | null>(
     data.profile?.supportLanguage ?? null,
   );
+  const [targetLocale, setTargetLocale] = useState(data.settings.targetLocale);
+  const pack = packList.find((p) => p.targetLocale === targetLocale) ?? packList[0];
+  const availableSupport = supportLanguagesFor(pack.supportLanguages);
   const s = t(lang);
 
   const save = () => {
     const name = nickname.trim();
     if (!name) return;
-    setSettings({ ...data.settings, parentLanguage: lang });
+    setSettings({ ...data.settings, parentLanguage: lang, targetLocale });
     setProfile({
       nickname: name.slice(0, 20),
       avatar,
@@ -51,6 +55,29 @@ export function ParentSetup({ onDone }: { onDone: () => void }) {
                 className={`lb-tile flex-1 py-3 ${lang === l.id ? 'border-brand-400 bg-brand-50' : 'border-brand-100'}`}
               >
                 <span className="text-lg font-bold">{l.label}</span>
+              </button>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset className="mt-6">
+          <legend className="text-base font-bold text-ink-700">{s.targetLabel}</legend>
+          <p className="mt-1 text-sm text-ink-700">{s.targetHint}</p>
+          <div className="mt-2 flex flex-wrap gap-3">
+            {packList.map((p) => (
+              <button
+                key={p.targetLocale}
+                type="button"
+                onClick={() => {
+                  setTargetLocale(p.targetLocale);
+                  if (!p.supportLanguages.includes(supportLanguage as never)) setSupportLanguage(null);
+                }}
+                aria-pressed={targetLocale === p.targetLocale}
+                className={`lb-tile flex-1 py-3 ${targetLocale === p.targetLocale ? 'border-brand-400 bg-brand-50' : 'border-brand-100'}`}
+              >
+                <span className="text-lg font-bold">
+                  {p.flag} {p.nativeLabel}
+                </span>
               </button>
             ))}
           </div>
@@ -96,7 +123,7 @@ export function ParentSetup({ onDone }: { onDone: () => void }) {
             >
               <span className="text-base font-bold">🚫 {s.supportNone}</span>
             </button>
-            {supportLanguages.map((sl) => (
+            {availableSupport.map((sl) => (
               <button
                 key={sl.id}
                 type="button"

@@ -1,9 +1,9 @@
 import { useMemo, useRef, useState } from 'react';
-import { getSkill, lessons } from '../content';
+import { getPack, getSkill } from '../content';
 import { buildParentAdvice, completedLessonIds, hintUsageRate, skillStats } from '../logic/progress';
 import { t, uiLanguages } from '../i18n/strings';
 import { useAppState } from '../state';
-import { supportLanguages } from '../content/support';
+import { supportLanguagesFor } from '../content/support';
 
 /** Einfache Rechenschranke: hält Kinder ab, ist KEINE Anmeldung. */
 export function ParentGate({ onPass, onCancel }: { onPass: () => void; onCancel: () => void }) {
@@ -65,6 +65,8 @@ export function ParentDashboard({ onBack, onEditProfile }: { onBack: () => void;
   const { data, setSettings, setProfile, exportJson, importJson, clearAll } = useAppState();
   const lang = data.settings.parentLanguage;
   const s = t(lang);
+  const pack = getPack(data.settings.targetLocale);
+  const availableSupport = supportLanguagesFor(pack.supportLanguages);
   const fileRef = useRef<HTMLInputElement>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -80,7 +82,7 @@ export function ParentDashboard({ onBack, onEditProfile }: { onBack: () => void;
   const advice = useMemo(
     () =>
       buildParentAdvice(data.attempts, data.completions, (id) => {
-        const skill = getSkill(id);
+        const skill = getSkill(pack, id);
         return skill?.label ?? { de: id, en: id, es: id };
       }),
     [data.attempts, data.completions],
@@ -142,7 +144,7 @@ export function ParentDashboard({ onBack, onEditProfile }: { onBack: () => void;
         ) : (
           <ul className="space-y-3">
             {stats.map((stat) => {
-              const skill = getSkill(stat.skillId);
+              const skill = getSkill(pack, stat.skillId);
               return (
                 <li key={stat.skillId}>
                   <div className="flex items-baseline justify-between gap-2">
@@ -200,7 +202,7 @@ export function ParentDashboard({ onBack, onEditProfile }: { onBack: () => void;
                 >
                   <span className="text-sm font-bold">🚫 {s.supportNone}</span>
                 </button>
-                {supportLanguages.map((sl) => (
+                {availableSupport.map((sl) => (
                   <button
                     key={sl.id}
                     type="button"
@@ -281,7 +283,7 @@ export function ParentDashboard({ onBack, onEditProfile }: { onBack: () => void;
         </div>
         <p className="mt-4 text-xs text-ink-700/80">{s.pedagogyNote}</p>
         <p className="mt-2 text-xs text-ink-700/70">
-          {lessons.length} Lektionen · Datenformat v{data.schemaVersion}
+          {pack.flag} {pack.nativeLabel} · {pack.lessons.length} {s.ofLessons.replace(/^\S+\s/, '')} · v{data.schemaVersion}
         </p>
       </section>
     </div>

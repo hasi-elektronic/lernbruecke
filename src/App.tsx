@@ -4,7 +4,7 @@ import { LessonScreen, type LessonResult } from './screens/LessonScreen';
 import { LessonEnd } from './screens/LessonEnd';
 import { ParentSetup } from './screens/ParentSetup';
 import { ParentDashboard, ParentGate } from './screens/ParentArea';
-import { getLesson } from './content';
+import { getLesson, getPack } from './content';
 import { useAppState } from './state';
 
 type Screen =
@@ -33,7 +33,7 @@ export default function App() {
       return <ParentSetup onDone={() => setScreen({ name: 'home' })} />;
 
     case 'lesson': {
-      const lesson = getLesson(screen.lessonId);
+      const lesson = getLesson(getPack(data.settings.targetLocale), screen.lessonId);
       if (!lesson) return <ChildHome onStartLesson={(id) => setScreen({ name: 'lesson', lessonId: id })} onParentArea={() => setScreen({ name: 'gate' })} />;
       return (
         <LessonScreen
