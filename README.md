@@ -39,6 +39,32 @@ statt abzustürzen.
 
 ---
 
+## Live und Deployment
+
+| | |
+|---|---|
+| Live | https://lernbruecke.hasi-elektronic.de |
+| Workers-URL | https://lernbruecke.hguencavdi.workers.dev |
+| Repo | https://github.com/hasi-elektronic/lernbruecke |
+
+Ausgeliefert als **Cloudflare Worker mit statischen Assets** (`wrangler.toml`),
+nicht als Pages-Projekt: Das Pages-Limit von 10 Projekten im Account ist erreicht.
+`not_found_handling = "single-page-application"` liefert bei unbekannten Pfaden
+`index.html` aus.
+
+Jeder Push auf `main` löst `.github/workflows/deploy.yml` aus:
+Typecheck → Tests → Build → Deploy. Schlägt ein Test fehl, wird nicht deployt.
+Benötigte Repository-Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.
+
+Manueller Deploy:
+
+```bash
+npm run build
+CLOUDFLARE_API_TOKEN=... npx wrangler deploy
+```
+
+---
+
 ## Projektstruktur
 
 ```
