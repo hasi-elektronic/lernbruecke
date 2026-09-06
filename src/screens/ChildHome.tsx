@@ -47,8 +47,8 @@ export function ChildHome({
               ? 'Du hast alles geschafft! Noch einmal üben:'
               : 'Deine nächste Aufgabe:'}
         </p>
-        <h2 className="mt-1 text-2xl font-extrabold text-ink-900">{recommendation.lesson.titleDe}</h2>
-        <p className="mt-1 text-base text-ink-700">{recommendation.lesson.objectiveDe}</p>
+        <h2 className="mt-1 text-2xl font-extrabold text-ink-900">{recommendation.lesson.title}</h2>
+        <p className="mt-1 text-base text-ink-700">{recommendation.lesson.objective}</p>
         <button
           type="button"
           onClick={() => onStartLesson(recommendation.lesson.id)}
@@ -68,8 +68,8 @@ export function ChildHome({
             <p className="text-3xl" aria-hidden="true">
               {m.emoji}
             </p>
-            <h3 className="mt-1 text-lg font-extrabold text-ink-900">{m.titleDe}</h3>
-            <p className="text-sm text-ink-700">{m.subtitleDe}</p>
+            <h3 className="mt-1 text-lg font-extrabold text-ink-900">{m.title}</h3>
+            <p className="text-sm text-ink-700">{m.subtitle}</p>
             <ul className="mt-3 space-y-2">
               {lessonsOfModule(m.id).map((lesson) => {
                 const isDone = done.has(lesson.id);
@@ -87,7 +87,7 @@ export function ChildHome({
                         {isDone ? '✅' : isNext ? '⭐' : '⬜'}
                       </span>
                       <span className="flex-1">
-                        <span className="block text-base font-bold text-ink-900">{lesson.titleDe}</span>
+                        <span className="block text-base font-bold text-ink-900">{lesson.title}</span>
                         <span className="block text-xs font-bold uppercase tracking-wide text-ink-700/70">
                           {isDone ? 'geschafft' : isNext ? 'als Nächstes' : 'offen'}
                         </span>

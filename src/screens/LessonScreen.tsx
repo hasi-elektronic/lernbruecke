@@ -6,6 +6,7 @@ import { applyResult, isUnassisted } from '../logic/scoring';
 import type { AnswerValue, Exercise, Lesson } from '../types/content';
 import type { AttemptRecord, LessonCompletion } from '../data/types';
 import { useAppState } from '../state';
+import { getSupport, supportLanguageInfo } from '../content/support';
 
 export interface LessonResult {
   lessonId: string;
@@ -57,7 +58,8 @@ export function LessonScreen({
   onFinish: (result: LessonResult) => void;
 }) {
   const { data, addAttempt, addCompletion } = useAppState();
-  const turkishHelpAllowed = data.profile?.turkishHelp ?? false;
+  const supportLang = data.profile?.supportLanguage ?? null;
+  const supportInfo = supportLang ? supportLanguageInfo(supportLang) : undefined;
   const soundEnabled = data.settings.soundEnabled;
 
   const allSteps = useMemo<Exercise[]>(() => [...lesson.steps, lesson.transferTask], [lesson]);
@@ -66,19 +68,20 @@ export function LessonScreen({
   const [index, setIndex] = useState(0);
   const [answer, setAnswer] = useState<AnswerValue>(null);
   const [hintLevel, setHintLevel] = useState(0);
-  const [showTr, setShowTr] = useState(false);
+  const [showSupport, setShowSupport] = useState(false);
   const [tries, setTries] = useState(0);
   const [state, setState] = useState<'answering' | 'wrong' | 'correct'>('answering');
   const [totals, setTotals] = useState({ unassisted: 0, hints: 0, transferOk: false });
 
   const exercise = allSteps[index];
   const isTransfer = index === transferIndex;
-  const hintsUsedHere = hintLevel + (showTr ? 1 : 0);
+  const support = getSupport(supportLang, exercise.id);
+  const hintsUsedHere = hintLevel + (showSupport ? 1 : 0);
 
   const readAloudText = [
-    index === 0 && lesson.storyDe ? lesson.storyDe : '',
-    exercise.contextDe ?? '',
-    exercise.instructionDe,
+    index === 0 && lesson.story ? lesson.story : '',
+    exercise.context ?? '',
+    exercise.instruction,
   ]
     .filter(Boolean)
     .join(' ');
@@ -86,7 +89,7 @@ export function LessonScreen({
   const resetForNext = () => {
     setAnswer(null);
     setHintLevel(0);
-    setShowTr(false);
+    setShowSupport(false);
     setTries(0);
     setState('answering');
   };
@@ -112,7 +115,7 @@ export function LessonScreen({
       isTransfer,
       correctFirstTry: unassisted,
       hintsUsed: hintsUsedHere,
-      usedTurkishHelp: showTr,
+      usedSupportLanguage: showSupport,
       attempts: nextTries,
       timestamp: Date.now(),
     };
@@ -158,7 +161,7 @@ export function LessonScreen({
       </header>
 
       <div className="lb-card p-5">
-        <p className="mb-1 text-sm font-bold uppercase tracking-wide text-brand-600">{lesson.titleDe}</p>
+        <p className="mb-1 text-sm font-bold uppercase tracking-wide text-brand-600">{lesson.title}</p>
 
         {isTransfer ? (
           <p className="mb-3 inline-block rounded-full bg-sun-200 px-3 py-1 text-sm font-extrabold text-ink-900">
@@ -166,15 +169,15 @@ export function LessonScreen({
           </p>
         ) : null}
 
-        {index === 0 && lesson.storyDe ? (
-          <p className="mb-3 text-lg text-ink-800">{lesson.storyDe}</p>
+        {index === 0 && lesson.story ? (
+          <p className="mb-3 text-lg text-ink-800">{lesson.story}</p>
         ) : null}
 
-        {exercise.contextDe ? (
-          <p className="mb-3 rounded-2xl bg-brand-50 p-3 text-lg text-ink-800">{exercise.contextDe}</p>
+        {exercise.context ? (
+          <p className="mb-3 rounded-2xl bg-brand-50 p-3 text-lg text-ink-800">{exercise.context}</p>
         ) : null}
 
-        <h1 className="mb-3 text-2xl font-extrabold leading-snug text-ink-900">{exercise.instructionDe}</h1>
+        <h1 className="mb-3 text-2xl font-extrabold leading-snug text-ink-900">{exercise.instruction}</h1>
 
         <div className="mb-4">
           <SpeakButton text={readAloudText} enabled={soundEnabled} />
@@ -188,14 +191,14 @@ export function LessonScreen({
 
         <ExerciseView exercise={exercise} answer={answer} onChange={setAnswer} locked={locked} />
 
-        {hintLevel >= 1 || showTr ? (
+        {hintLevel >= 1 || showSupport ? (
           <div className="mt-4 rounded-3xl border-4 border-brand-200 bg-brand-50 p-4">
             <p className="text-base font-extrabold text-brand-800">💡 Tipp</p>
-            {hintLevel >= 1 ? <p className="mt-1 text-lg text-ink-800">{exercise.hintDe}</p> : null}
-            {hintLevel >= 2 ? <p className="mt-2 text-lg text-ink-800">{exercise.hintDetailDe}</p> : null}
-            {showTr ? (
-              <p className="mt-2 rounded-2xl bg-white p-3 text-lg text-ink-800" lang="tr">
-                🇹🇷 {exercise.hintTr}
+            {hintLevel >= 1 ? <p className="mt-1 text-lg text-ink-800">{exercise.hint}</p> : null}
+            {hintLevel >= 2 ? <p className="mt-2 text-lg text-ink-800">{exercise.hintDetail}</p> : null}
+            {showSupport && support && supportInfo ? (
+              <p className="mt-2 rounded-2xl bg-white p-3 text-lg text-ink-800" lang={supportInfo.id}>
+                {supportInfo.flag} {support.hint}
               </p>
             ) : null}
           </div>
@@ -209,10 +212,10 @@ export function LessonScreen({
 
         {state === 'correct' ? (
           <div className="mt-4">
-            <FeedbackBox kind="correct" title="Richtig!" text={exercise.explanationDe} />
-            {showTr ? (
-              <p className="mt-2 rounded-2xl bg-white p-3 text-base text-ink-800" lang="tr">
-                🇹🇷 {exercise.explanationTr}
+            <FeedbackBox kind="correct" title="Richtig!" text={exercise.explanation} />
+            {showSupport && support && supportInfo ? (
+              <p className="mt-2 rounded-2xl bg-white p-3 text-base text-ink-800" lang={supportInfo.id}>
+                {supportInfo.flag} {support.explanation}
               </p>
             ) : null}
           </div>
@@ -237,9 +240,14 @@ export function LessonScreen({
               >
                 💡 {hintLevel === 0 ? 'Hilfe' : 'Mehr Hilfe'}
               </button>
-              {turkishHelpAllowed && !showTr ? (
-                <button type="button" onClick={() => setShowTr(true)} className="lb-btn-sun" lang="tr">
-                  🇹🇷 Türkçe açıkla
+              {support && supportInfo && !showSupport ? (
+                <button
+                  type="button"
+                  onClick={() => setShowSupport(true)}
+                  className="lb-btn-sun"
+                  lang={supportInfo.id}
+                >
+                  {supportInfo.flag} {supportInfo.nativeLabel}
                 </button>
               ) : null}
             </>

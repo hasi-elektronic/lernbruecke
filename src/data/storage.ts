@@ -49,6 +49,9 @@ export function createBrowserStore(): KeyValueStore {
   }
 }
 
+const ALLOWED_SUPPORT = ['tr', 'es', 'en', 'de'];
+const ALLOWED_UI = ['de', 'en', 'es'];
+
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
@@ -60,7 +63,12 @@ function sanitizeProfile(raw: unknown): ChildProfile | null {
   return {
     nickname,
     avatar: typeof raw.avatar === 'string' && raw.avatar ? raw.avatar : '🦊',
-    turkishHelp: raw.turkishHelp === true,
+    supportLanguage: ALLOWED_SUPPORT.includes(raw.supportLanguage as string)
+      ? (raw.supportLanguage as ChildProfile['supportLanguage'])
+      // Migration v1 -> v2: aus dem alten Türkisch-Schalter wird eine Sprachwahl.
+      : raw.turkishHelp === true
+        ? 'tr'
+        : null,
     createdAt: typeof raw.createdAt === 'number' ? raw.createdAt : Date.now(),
   };
 }
@@ -68,7 +76,10 @@ function sanitizeProfile(raw: unknown): ChildProfile | null {
 function sanitizeSettings(raw: unknown): Settings {
   if (!isObject(raw)) return { ...defaultSettings };
   return {
-    parentLanguage: raw.parentLanguage === 'tr' ? 'tr' : 'de',
+    parentLanguage: ALLOWED_UI.includes(raw.parentLanguage as string)
+      ? (raw.parentLanguage as Settings['parentLanguage'])
+      // v1 kannte 'tr' als Oberflächensprache; das gibt es nicht mehr.
+      : 'de',
     reducedMotion: raw.reducedMotion === true,
     soundEnabled: raw.soundEnabled !== false,
   };
@@ -85,7 +96,7 @@ function sanitizeAttempt(raw: unknown): AttemptRecord | null {
     isTransfer: raw.isTransfer === true,
     correctFirstTry: raw.correctFirstTry === true,
     hintsUsed: typeof raw.hintsUsed === 'number' && raw.hintsUsed >= 0 ? Math.floor(raw.hintsUsed) : 0,
-    usedTurkishHelp: raw.usedTurkishHelp === true,
+    usedSupportLanguage: raw.usedSupportLanguage === true || raw.usedTurkishHelp === true,
     attempts: typeof raw.attempts === 'number' && raw.attempts > 0 ? Math.floor(raw.attempts) : 1,
     timestamp: typeof raw.timestamp === 'number' ? raw.timestamp : Date.now(),
   };

@@ -14,7 +14,7 @@ export function LessonEnd({ result, onHome }: { result: LessonResult; onHome: ()
         <h1 className="mt-2 text-3xl font-extrabold text-ink-900">Fertig!</h1>
         {lesson ? (
           <p className="mt-2 text-lg text-ink-800">
-            Du hast geübt: <strong>{lesson.objectiveDe}</strong>
+            Du hast geübt: <strong>{lesson.objective}</strong>
           </p>
         ) : null}
 

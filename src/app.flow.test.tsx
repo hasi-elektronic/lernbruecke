@@ -13,10 +13,13 @@ function renderApp() {
   );
 }
 
-async function completeSetup(user: ReturnType<typeof userEvent.setup>, turkishHelp = false) {
+async function completeSetup(
+  user: ReturnType<typeof userEvent.setup>,
+  supportLanguage: 'Türkçe' | 'Español' | 'English' | null = null,
+) {
   await user.type(screen.getByPlaceholderText(/Zeyno/i), 'Zeyno');
-  if (turkishHelp) {
-    await user.click(screen.getByRole('checkbox', { name: /Türkische Hilfe/i }));
+  if (supportLanguage) {
+    await user.click(screen.getByRole('button', { name: new RegExp(supportLanguage) }));
   }
   await user.click(screen.getByRole('button', { name: /Los geht/i }));
 }
@@ -67,43 +70,55 @@ describe('App-Flows', () => {
     expect(screen.getByText('💡 Tipp')).toBeTruthy();
   });
 
-  it('zeigt bei deutscher Auswahl keine türkische Hilfe im Kinderbereich', async () => {
+  it('zeigt ohne gewählte Hilfssprache keine fremdsprachige Hilfe', async () => {
     const user = userEvent.setup();
     renderApp();
-    await completeSetup(user); // Deutsch, Haken nicht gesetzt
+    await completeSetup(user);
     await user.click(screen.getByRole('button', { name: /Weiterlernen/i }));
-    expect(screen.queryByRole('button', { name: /Türkçe açıkla/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Türkçe/ })).toBeNull();
   });
 
-  it('setzt den Haken automatisch, wenn die Elternsprache Türkisch ist', async () => {
+  it('bietet drei Oberflächensprachen und lässt die Hilfssprache standardmäßig aus', async () => {
     const user = userEvent.setup();
     renderApp();
-    await user.click(screen.getByRole('button', { name: 'Türkçe' }));
-    const box = screen.getByRole('checkbox', { name: /Türkçe yardım/i }) as HTMLInputElement;
-    expect(box.checked).toBe(true);
+    for (const label of ['Deutsch', 'English', 'Español']) {
+      expect(screen.getByRole('button', { name: label })).toBeTruthy();
+    }
+    await user.click(screen.getByRole('button', { name: 'English' }));
+    expect(screen.getByText(/Welcome to Lernbrücke/i)).toBeTruthy();
+    await user.click(screen.getByRole('button', { name: 'Español' }));
+    expect(screen.getByText(/Bienvenido a Lernbrücke/i)).toBeTruthy();
     await user.click(screen.getByRole('button', { name: 'Deutsch' }));
-    expect((screen.getByRole('checkbox', { name: /Türkische Hilfe/i }) as HTMLInputElement).checked).toBe(false);
+    // Ohne bewusste Wahl bleibt die Hilfssprache aus.
+    await completeSetup(user);
+    await user.click(screen.getByRole('button', { name: /Weiterlernen/i }));
+    for (const name of [/Türkçe/, /Español/, /English/]) {
+      expect(screen.queryByRole('button', { name })).toBeNull();
+    }
   });
 
-  it('schaltet die türkische Hilfe im Elternbereich nachträglich um', async () => {
+  it('schaltet die Hilfssprache im Elternbereich nachträglich um', async () => {
     const user = userEvent.setup();
     renderApp();
-    await completeSetup(user); // ohne türkische Hilfe
+    await completeSetup(user); // ohne Hilfssprache
     await openParentArea(user);
-    await user.click(screen.getByRole('checkbox', { name: /Türkische Hilfe/i }));
+    const settings = screen.getByRole('group', { name: /Sprache der Hilfe/i });
+    await user.click(within(settings).getByRole('button', { name: /Español/ }));
     await user.click(screen.getByRole('button', { name: /Zurück/i }));
     await user.click(screen.getByRole('button', { name: /Weiterlernen/i }));
-    expect(screen.getByRole('button', { name: /Türkçe açıkla/i })).toBeTruthy();
+    const supportButton = screen.getByRole('button', { name: /Español/ });
+    await user.click(supportButton);
+    expect(screen.getByText(/significa marcar/i)).toBeTruthy();
   });
 
   it('blendet die türkische Hilfe erst auf Wunsch ein', async () => {
     const user = userEvent.setup();
     renderApp();
-    await completeSetup(user, true);
+    await completeSetup(user, 'Türkçe');
     await user.click(screen.getByRole('button', { name: /Weiterlernen/i }));
 
     expect(screen.queryByText(/işaretlemek/i)).toBeNull();
-    await user.click(screen.getByRole('button', { name: /Türkçe açıkla/i }));
+    await user.click(screen.getByRole('button', { name: /Türkçe/ }));
     expect(screen.getByText(/işaretlemek/i)).toBeTruthy();
   });
 
@@ -199,7 +214,7 @@ describe('App-Flows', () => {
     expect(window.localStorage.getItem(STORAGE_KEY)).toBeNull();
   });
 
-  it('schaltet die Elternoberfläche auf Türkisch um', async () => {
+  it('schaltet die Elternoberfläche auf Englisch um', async () => {
     const user = userEvent.setup();
     renderApp();
     await completeSetup(user);
@@ -210,7 +225,7 @@ describe('App-Flows', () => {
     await user.click(screen.getByRole('button', { name: 'Weiter' }));
 
     const settings = screen.getByRole('heading', { name: 'Einstellungen' }).parentElement as HTMLElement;
-    await user.click(within(settings).getByRole('button', { name: 'Türkçe' }));
-    expect(screen.getByRole('heading', { name: 'Veli alanı' })).toBeTruthy();
+    await user.click(within(settings).getByRole('button', { name: 'English' }));
+    expect(screen.getByRole('heading', { name: 'Parent area' })).toBeTruthy();
   });
 });

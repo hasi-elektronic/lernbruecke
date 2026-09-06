@@ -10,7 +10,7 @@ const sampleAttempt: AttemptRecord = {
   isTransfer: false,
   correctFirstTry: true,
   hintsUsed: 0,
-  usedTurkishHelp: false,
+  usedSupportLanguage: false,
   attempts: 1,
   timestamp: 1700000000000,
 };
@@ -28,16 +28,38 @@ describe('migrate', () => {
   it('wirft kaputte Einzelsätze weg, behält gültige', () => {
     const data = migrate({
       schemaVersion: 1,
-      profile: { nickname: 'Zeyno', avatar: '🦊', turkishHelp: true, createdAt: 1 },
-      settings: { parentLanguage: 'tr', soundEnabled: false },
+      profile: { nickname: 'Zeyno', avatar: '🦊', supportLanguage: 'tr', createdAt: 1 },
+      settings: { parentLanguage: 'es', soundEnabled: false },
       attempts: [sampleAttempt, { lessonId: 5 }, null, { exerciseId: 'x' }],
       completions: [{ nonsense: true }],
     });
     expect(data.profile?.nickname).toBe('Zeyno');
-    expect(data.settings.parentLanguage).toBe('tr');
+    expect(data.settings.parentLanguage).toBe('es');
     expect(data.settings.soundEnabled).toBe(false);
     expect(data.attempts).toHaveLength(1);
     expect(data.completions).toHaveLength(0);
+  });
+
+  it('migriert v1: turkishHelp wird zur Hilfssprache', () => {
+    const v1 = migrate({
+      schemaVersion: 1,
+      profile: { nickname: 'Zeyno', avatar: '🦊', turkishHelp: true, createdAt: 1 },
+      settings: { parentLanguage: 'tr' },
+      attempts: [{ ...sampleAttempt, usedTurkishHelp: true } as unknown],
+    });
+    expect(v1.schemaVersion).toBe(2);
+    expect(v1.profile?.supportLanguage).toBe('tr');
+    // 'tr' war in v1 eine Oberflächensprache, ist es aber nicht mehr.
+    expect(v1.settings.parentLanguage).toBe('de');
+    expect(v1.attempts[0].usedSupportLanguage).toBe(true);
+  });
+
+  it('migriert v1 ohne türkische Hilfe zu keiner Hilfssprache', () => {
+    const v1 = migrate({
+      schemaVersion: 1,
+      profile: { nickname: 'Ben', avatar: '🐼', turkishHelp: false, createdAt: 1 },
+    });
+    expect(v1.profile?.supportLanguage).toBeNull();
   });
 
   it('liest Altdaten ohne Versionsfeld', () => {
@@ -50,7 +72,7 @@ describe('migrate', () => {
   it('übernimmt aus neueren Versionen nur Profil und Einstellungen', () => {
     const data = migrate({
       schemaVersion: SCHEMA_VERSION + 5,
-      profile: { nickname: 'Neu', avatar: '🐼', turkishHelp: false, createdAt: 2 },
+      profile: { nickname: 'Neu', avatar: '🐼', supportLanguage: null, createdAt: 2 },
       settings: { parentLanguage: 'de' },
       attempts: [sampleAttempt],
     });
@@ -67,7 +89,7 @@ describe('ProgressRepository', () => {
   it('behält Daten über einen Neustart hinweg', () => {
     const store = createMemoryStore();
     const repo = new ProgressRepository(store);
-    repo.setProfile({ nickname: 'Zeyno', avatar: '🐢', turkishHelp: true, createdAt: 1 });
+    repo.setProfile({ nickname: 'Zeyno', avatar: '🐢', supportLanguage: 'tr', createdAt: 1 });
     repo.addAttempt(sampleAttempt);
     repo.addCompletion({
       lessonId: 'b2',
@@ -96,7 +118,7 @@ describe('ProgressRepository', () => {
   it('löscht alle Daten vollständig', () => {
     const store = createMemoryStore();
     const repo = new ProgressRepository(store);
-    repo.setProfile({ nickname: 'Zeyno', avatar: '🐢', turkishHelp: false, createdAt: 1 });
+    repo.setProfile({ nickname: 'Zeyno', avatar: '🐢', supportLanguage: null, createdAt: 1 });
     repo.addAttempt(sampleAttempt);
     repo.clear();
     expect(repo.getData().profile).toBeNull();
@@ -105,7 +127,7 @@ describe('ProgressRepository', () => {
 
   it('exportiert und importiert denselben Fortschritt', () => {
     const repo = new ProgressRepository(createMemoryStore());
-    repo.setProfile({ nickname: 'Zeyno', avatar: '🦉', turkishHelp: true, createdAt: 1 });
+    repo.setProfile({ nickname: 'Zeyno', avatar: '🦉', supportLanguage: 'tr', createdAt: 1 });
     repo.addAttempt(sampleAttempt);
     const json = repo.exportJson();
 

@@ -11,7 +11,7 @@ function attempt(partial: Partial<AttemptRecord>): AttemptRecord {
     isTransfer: false,
     correctFirstTry: true,
     hintsUsed: 0,
-    usedTurkishHelp: false,
+    usedSupportLanguage: false,
     attempts: 1,
     timestamp: 1,
     ...partial,
@@ -91,7 +91,7 @@ describe('recommendNextLesson', () => {
 });
 
 describe('buildParentAdvice', () => {
-  const label = (id: string) => ({ de: id, tr: id });
+  const label = (id: string) => ({ de: id, en: id, es: id });
 
   it('sagt ehrlich, dass noch keine Daten da sind', () => {
     const advice = buildParentAdvice([], [], label);
@@ -107,6 +107,6 @@ describe('buildParentAdvice', () => {
     ];
     const advice = buildParentAdvice(attempts, [completion({})], label);
     expect(advice.some((a) => a.key === 'many-hints')).toBe(true);
-    expect(advice.every((a) => a.de.length > 0 && a.tr.length > 0)).toBe(true);
+    expect(advice.every((a) => a.de.length > 0 && a.en.length > 0 && a.es.length > 0)).toBe(true);
   });
 });

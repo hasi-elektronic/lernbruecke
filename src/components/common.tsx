@@ -57,11 +57,11 @@ export function SceneView({ groups }: { groups: SceneGroup[] }) {
   return (
     <div className="space-y-3">
       {groups.map((g) => (
-        <div key={g.labelDe} className="rounded-2xl bg-brand-50/70 p-3">
+        <div key={g.label} className="rounded-2xl bg-brand-50/70 p-3">
           <p className="mb-1 text-sm font-bold uppercase tracking-wide text-brand-700">
-            {g.labelDe} · {g.count}
+            {g.label} · {g.count}
           </p>
-          <div className="flex flex-wrap gap-1 text-3xl leading-none" aria-label={`${g.count} ${g.labelDe}`}>
+          <div className="flex flex-wrap gap-1 text-3xl leading-none" aria-label={`${g.count} ${g.label}`}>
             {Array.from({ length: g.count }).map((_, i) => (
               <span key={i} aria-hidden="true">
                 {g.emoji}

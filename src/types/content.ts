@@ -15,38 +15,35 @@ export type InteractionType =
 
 export interface VisualItem {
   id: string;
-  labelDe: string;
+  label: string;
   emoji?: string;
 }
 
 export interface SceneGroup {
-  labelDe: string;
+  label: string;
   emoji: string;
   count: number;
 }
 
 export interface SortTarget {
   id: string;
-  labelDe: string;
+  label: string;
 }
 
 interface ExerciseBase {
   id: string;
   /** Arbeitsanweisung in einfachem Deutsch (wird vorgelesen). */
-  instructionDe: string;
+  instruction: string;
   /** Optionaler Kontext/Story-Satz nur für diese Übung. */
-  contextDe?: string;
+  context?: string;
   /** Optionale Bild-Szene (zwei Mengen nebeneinander o. ä.). */
   sceneGroups?: SceneGroup[];
   /** Stufe 1: kurzer, sichtbarer Hinweis. */
-  hintDe: string;
+  hint: string;
   /** Stufe 2: ausführlichere Erklärung auf Deutsch. */
-  hintDetailDe: string;
-  /** Stufe 3: türkische Hilfe (nur auf Wunsch). */
-  hintTr: string;
+  hintDetail: string;
   /** Erklärung der mathematischen Beziehung nach der Antwort. */
-  explanationDe: string;
-  explanationTr: string;
+  explanation: string;
 }
 
 export interface SelectOneExercise extends ExerciseBase {
@@ -74,18 +71,18 @@ export interface MoveObjectsExercise extends ExerciseBase {
   /** 'add' = aus dem Vorrat dazulegen, 'remove' = wegnehmen. */
   mode: 'add' | 'remove';
   emoji: string;
-  objectLabelDe: string;
+  objectLabel: string;
   startCount: number;
   moveCount: number;
-  sourceLabelDe: string;
-  targetLabelDe: string;
+  sourceLabel: string;
+  targetLabel: string;
   /** Anzahl der Objekte, die bewegt werden müssen. */
   correctAnswer: number;
 }
 
 export interface NumberInputExercise extends ExerciseBase {
   interactionType: 'number-input';
-  unitDe: string;
+  unit: string;
   correctAnswer: number;
 }
 
@@ -102,10 +99,10 @@ export interface Lesson {
   id: string;
   moduleId: ModuleId;
   skillId: string;
-  titleDe: string;
-  objectiveDe: string;
+  title: string;
+  objective: string;
   /** Einstiegs-Geschichte, wird auf dem ersten Schritt vorgelesen. */
-  storyDe?: string;
+  story?: string;
   steps: Exercise[];
   /** Kontrollaufgabe in neuem Kontext – wird ohne Hilfe gewertet. */
   transferTask: Exercise;
@@ -113,10 +110,26 @@ export interface Lesson {
 
 export type ModuleId = 'A' | 'B' | 'C' | 'D';
 
+/** Sprache, in der die Aufgaben gestellt sind – das ist die Sprache, die das
+ *  Kind verstehen lernen soll. Ein Content-Pack pro Ziel-Locale. */
+export type TargetLocale = 'de-DE' | 'en-US';
+
+/** Sprache, die zu Hause gesprochen wird. Wird NUR als Verständnisbrücke
+ *  eingeblendet, nie als Ersatz für die Zielsprache. */
+export type SupportLanguage = 'tr' | 'es' | 'en' | 'de';
+
+export interface SupportEntry {
+  hint: string;
+  explanation: string;
+}
+
+/** exerciseId -> Hilfstext. Eine neue Sprache ist reine Datenarbeit. */
+export type SupportPack = Record<string, SupportEntry>;
+
 export interface LearningModule {
   id: ModuleId;
-  titleDe: string;
-  subtitleDe: string;
+  title: string;
+  subtitle: string;
   emoji: string;
   /** Tailwind-Farbklassen-Schlüssel für die Aufgabenkarte. */
   tone: 'brand' | 'turq' | 'sun' | 'ink';
@@ -124,6 +137,6 @@ export interface LearningModule {
 
 export interface SkillInfo {
   id: string;
-  labelDe: string;
-  labelTr: string;
+  /** Bezeichnung je Oberflächensprache. */
+  label: { de: string; en: string; es: string };
 }

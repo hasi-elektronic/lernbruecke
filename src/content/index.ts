@@ -5,10 +5,10 @@ import { moduleCLessons } from './moduleC';
 import { moduleDLessons } from './moduleD';
 
 export const modules: LearningModule[] = [
-  { id: 'A', titleDe: 'Aufgaben verstehen', subtitleDe: 'markieren · auswählen · zuordnen', emoji: '🔍', tone: 'brand' },
-  { id: 'B', titleDe: 'Dazu und weg', subtitleDe: 'mehr werden · weniger werden', emoji: '🍪', tone: 'turq' },
-  { id: 'C', titleDe: 'Vergleichen', subtitleDe: 'mehr · weniger · Unterschied', emoji: '⚖️', tone: 'sun' },
-  { id: 'D', titleDe: 'Was ist gefragt?', subtitleDe: 'Frage · Zahlen · Bild', emoji: '💡', tone: 'ink' },
+  { id: 'A', title: 'Aufgaben verstehen', subtitle: 'markieren · auswählen · zuordnen', emoji: '🔍', tone: 'brand' },
+  { id: 'B', title: 'Dazu und weg', subtitle: 'mehr werden · weniger werden', emoji: '🍪', tone: 'turq' },
+  { id: 'C', title: 'Vergleichen', subtitle: 'mehr · weniger · Unterschied', emoji: '⚖️', tone: 'sun' },
+  { id: 'D', title: 'Was ist gefragt?', subtitle: 'Frage · Zahlen · Bild', emoji: '💡', tone: 'ink' },
 ];
 
 export const lessons: Lesson[] = [
@@ -19,18 +19,18 @@ export const lessons: Lesson[] = [
 ];
 
 export const skills: SkillInfo[] = [
-  { id: 'anweisung-markieren', labelDe: 'Markieren verstehen', labelTr: 'İşaretleme yönergesi' },
-  { id: 'anweisung-auswaehlen', labelDe: 'Auswählen verstehen', labelTr: 'Seçme yönergesi' },
-  { id: 'anweisung-zuordnen', labelDe: 'Zuordnen verstehen', labelTr: 'Eşleştirme yönergesi' },
-  { id: 'dazu-rechnen', labelDe: 'Dazulegen erkennen', labelTr: 'Ekleme durumunu tanıma' },
-  { id: 'weg-rechnen', labelDe: 'Wegnehmen erkennen', labelTr: 'Çıkarma durumunu tanıma' },
-  { id: 'dazu-oder-weg', labelDe: 'Mehr oder weniger entscheiden', labelTr: 'Artıyor mu azalıyor mu' },
-  { id: 'vergleichen-mehr-weniger', labelDe: 'Mengen vergleichen', labelTr: 'Miktar karşılaştırma' },
-  { id: 'unterschied-bestimmen', labelDe: 'Unterschied bestimmen', labelTr: 'Farkı bulma' },
-  { id: 'ausgleichen', labelDe: 'Gleich viele machen', labelTr: 'Eşitleme' },
-  { id: 'frage-erkennen', labelDe: 'Frage erkennen', labelTr: 'Soruyu anlama' },
-  { id: 'zahlen-auswaehlen', labelDe: 'Nötige Zahlen finden', labelTr: 'Gerekli sayıları bulma' },
-  { id: 'modell-waehlen', labelDe: 'Passendes Bild wählen', labelTr: 'Uygun modeli seçme' },
+  { id: 'anweisung-markieren', label: { de: 'Markieren verstehen', en: 'Understanding „mark all"', es: 'Entender „marcar todo"' } },
+  { id: 'anweisung-auswaehlen', label: { de: 'Auswählen verstehen', en: 'Understanding „choose one"', es: 'Entender „elegir uno"' } },
+  { id: 'anweisung-zuordnen', label: { de: 'Zuordnen verstehen', en: 'Understanding „sort into groups"', es: 'Entender „clasificar"' } },
+  { id: 'dazu-rechnen', label: { de: 'Dazulegen erkennen', en: 'Recognising adding on', es: 'Reconocer cuando se agrega' } },
+  { id: 'weg-rechnen', label: { de: 'Wegnehmen erkennen', en: 'Recognising taking away', es: 'Reconocer cuando se quita' } },
+  { id: 'dazu-oder-weg', label: { de: 'Mehr oder weniger entscheiden', en: 'Deciding more or fewer', es: 'Decidir si aumenta o disminuye' } },
+  { id: 'vergleichen-mehr-weniger', label: { de: 'Mengen vergleichen', en: 'Comparing amounts', es: 'Comparar cantidades' } },
+  { id: 'unterschied-bestimmen', label: { de: 'Unterschied bestimmen', en: 'Finding the difference', es: 'Hallar la diferencia' } },
+  { id: 'ausgleichen', label: { de: 'Gleich viele machen', en: 'Making amounts equal', es: 'Igualar cantidades' } },
+  { id: 'frage-erkennen', label: { de: 'Frage erkennen', en: 'Identifying the question', es: 'Identificar la pregunta' } },
+  { id: 'zahlen-auswaehlen', label: { de: 'Nötige Zahlen finden', en: 'Picking the needed numbers', es: 'Elegir los números necesarios' } },
+  { id: 'modell-waehlen', label: { de: 'Passendes Bild wählen', en: 'Choosing the right model', es: 'Elegir el modelo correcto' } },
 ];
 
 export function getLesson(id: string): Lesson | undefined {

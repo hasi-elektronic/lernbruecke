@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useAppState } from '../state';
-import { t } from '../i18n/strings';
+import { t, uiLanguages } from '../i18n/strings';
 import type { UiLanguage } from '../data/types';
+import type { SupportLanguage } from '../types/content';
+import { supportLanguages } from '../content/support';
 
 const AVATARS = ['🦊', '🐼', '🐢', '🦉', '🐙', '🦁', '🐝', '🐬'];
 
@@ -10,11 +12,9 @@ export function ParentSetup({ onDone }: { onDone: () => void }) {
   const [lang, setLang] = useState<UiLanguage>(data.settings.parentLanguage);
   const [nickname, setNickname] = useState(data.profile?.nickname ?? '');
   const [avatar, setAvatar] = useState(data.profile?.avatar ?? AVATARS[0]);
-  const [turkishHelp, setTurkishHelp] = useState(
-    data.profile?.turkishHelp ?? data.settings.parentLanguage === 'tr',
+  const [supportLanguage, setSupportLanguage] = useState<SupportLanguage | null>(
+    data.profile?.supportLanguage ?? null,
   );
-  // Sobald der Haken einmal bewusst gesetzt wurde, überschreibt die Sprachwahl ihn nicht mehr.
-  const [helpTouched, setHelpTouched] = useState(data.profile !== null);
   const s = t(lang);
 
   const save = () => {
@@ -24,7 +24,7 @@ export function ParentSetup({ onDone }: { onDone: () => void }) {
     setProfile({
       nickname: name.slice(0, 20),
       avatar,
-      turkishHelp,
+      supportLanguage,
       createdAt: data.profile?.createdAt ?? Date.now(),
     });
     onDone();
@@ -41,19 +41,16 @@ export function ParentSetup({ onDone }: { onDone: () => void }) {
 
         <fieldset className="mt-6">
           <legend className="text-base font-bold text-ink-700">{s.languageLabel}</legend>
-          <div className="mt-2 flex gap-3">
-            {(['de', 'tr'] as UiLanguage[]).map((l) => (
+          <div className="mt-2 flex flex-wrap gap-3">
+            {uiLanguages.map((l) => (
               <button
-                key={l}
+                key={l.id}
                 type="button"
-                onClick={() => {
-                  setLang(l);
-                  if (!helpTouched) setTurkishHelp(l === 'tr');
-                }}
-                aria-pressed={lang === l}
-                className={`lb-tile flex-1 py-3 ${lang === l ? 'border-brand-400 bg-brand-50' : 'border-brand-100'}`}
+                onClick={() => setLang(l.id)}
+                aria-pressed={lang === l.id}
+                className={`lb-tile flex-1 py-3 ${lang === l.id ? 'border-brand-400 bg-brand-50' : 'border-brand-100'}`}
               >
-                <span className="text-lg font-bold">{l === 'de' ? 'Deutsch' : 'Türkçe'}</span>
+                <span className="text-lg font-bold">{l.label}</span>
               </button>
             ))}
           </div>
@@ -88,22 +85,34 @@ export function ParentSetup({ onDone }: { onDone: () => void }) {
           </div>
         </fieldset>
 
-        <label className="mt-6 flex items-start gap-3 rounded-2xl bg-sun-100 p-4">
-          <input
-            type="checkbox"
-            checked={turkishHelp}
-            onChange={(e) => {
-              setTurkishHelp(e.target.checked);
-              setHelpTouched(true);
-            }}
-            className="mt-1 h-6 w-6 accent-[#33afe2]"
-          />
-          <span>
-            <span className="block text-base font-bold text-ink-900">{s.turkishHelpLabel}</span>
-            <span className="block text-sm text-ink-700">{s.turkishHelpHint}</span>
-            <span className="mt-1 block text-sm text-ink-700">{s.turkishHelpIndependent}</span>
-          </span>
-        </label>
+        <fieldset className="mt-6 rounded-2xl bg-sun-100 p-4">
+          <legend className="text-base font-bold text-ink-900">{s.supportLabel}</legend>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setSupportLanguage(null)}
+              aria-pressed={supportLanguage === null}
+              className={`lb-tile px-4 py-3 ${supportLanguage === null ? 'border-brand-400 bg-white' : 'border-white bg-white/60'}`}
+            >
+              <span className="text-base font-bold">🚫 {s.supportNone}</span>
+            </button>
+            {supportLanguages.map((sl) => (
+              <button
+                key={sl.id}
+                type="button"
+                onClick={() => setSupportLanguage(sl.id)}
+                aria-pressed={supportLanguage === sl.id}
+                className={`lb-tile px-4 py-3 ${supportLanguage === sl.id ? 'border-brand-400 bg-white' : 'border-white bg-white/60'}`}
+              >
+                <span className="text-base font-bold">
+                  {sl.flag} {sl.nativeLabel}
+                </span>
+              </button>
+            ))}
+          </div>
+          <p className="mt-2 text-sm text-ink-700">{s.supportHint}</p>
+          <p className="mt-1 text-sm text-ink-700">{s.supportIndependent}</p>
+        </fieldset>
 
         <div className="mt-6 space-y-2 rounded-2xl bg-brand-50 p-4 text-sm text-ink-800">
           <p>🔒 {s.storageNotice}</p>

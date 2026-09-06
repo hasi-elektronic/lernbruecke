@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { lessons, lessonsOfModule, modules, skills } from './index';
+import { supportLanguages, supportPacks } from './support';
 import type { Exercise } from '../types/content';
 
 function allExercises(): Exercise[] {
@@ -32,20 +33,43 @@ describe('Lektionsbestand', () => {
     for (const lesson of lessons) {
       expect(lesson.steps.length).toBeGreaterThanOrEqual(2);
       expect(lesson.transferTask).toBeTruthy();
-      expect(lesson.titleDe.length).toBeGreaterThan(3);
-      expect(lesson.objectiveDe.length).toBeGreaterThan(10);
+      expect(lesson.title.length).toBeGreaterThan(3);
+      expect(lesson.objective.length).toBeGreaterThan(10);
     }
   });
 
   it('hat überall alle drei Hilfestufen und eine Erklärung', () => {
     for (const e of allExercises()) {
-      expect(e.instructionDe.trim().length).toBeGreaterThan(3);
-      expect(e.hintDe.trim().length).toBeGreaterThan(3);
-      expect(e.hintDetailDe.trim().length).toBeGreaterThan(3);
-      expect(e.hintTr.trim().length).toBeGreaterThan(3);
-      expect(e.explanationDe.trim().length).toBeGreaterThan(3);
-      expect(e.explanationTr.trim().length).toBeGreaterThan(3);
-      expect(e.hintDetailDe).not.toBe(e.hintDe);
+      expect(e.instruction.trim().length).toBeGreaterThan(3);
+      expect(e.hint.trim().length).toBeGreaterThan(3);
+      expect(e.hintDetail.trim().length).toBeGreaterThan(3);
+      expect(e.explanation.trim().length).toBeGreaterThan(3);
+      expect(e.hintDetail).not.toBe(e.hint);
+    }
+  });
+});
+
+describe('Hilfssprachen', () => {
+  it('deckt jede Übung in jeder angebotenen Sprache ab', () => {
+    const ids = allExercises().map((e) => e.id);
+    for (const lang of supportLanguages) {
+      const pack = supportPacks[lang.id];
+      expect(pack, `Pack fehlt: ${lang.id}`).toBeTruthy();
+      for (const id of ids) {
+        const entry = pack?.[id];
+        expect(entry, `${lang.id} fehlt für ${id}`).toBeTruthy();
+        expect(entry?.hint.trim().length).toBeGreaterThan(3);
+        expect(entry?.explanation.trim().length).toBeGreaterThan(3);
+      }
+    }
+  });
+
+  it('enthält keine verwaisten Einträge', () => {
+    const ids = new Set(allExercises().map((e) => e.id));
+    for (const lang of supportLanguages) {
+      for (const key of Object.keys(supportPacks[lang.id] ?? {})) {
+        expect(ids.has(key), `${lang.id}: unbekannte Übung ${key}`).toBe(true);
+      }
     }
   });
 });
@@ -95,7 +119,7 @@ describe('Lösungen sind konsistent', () => {
   it('wiederholt keine Aufgabenstellung wortgleich mit gleichem Kontext', () => {
     const seen = new Set<string>();
     for (const e of allExercises()) {
-      const key = `${e.contextDe ?? ''}|${e.instructionDe}`;
+      const key = `${e.context ?? ''}|${e.instruction}`;
       expect(seen.has(key)).toBe(false);
       seen.add(key);
     }
@@ -103,8 +127,8 @@ describe('Lösungen sind konsistent', () => {
 
   it('nutzt in der Kontrollaufgabe einen anderen Kontext als in den Übungen', () => {
     for (const lesson of lessons) {
-      const stepTexts = lesson.steps.map((s) => `${s.contextDe ?? ''}${s.instructionDe}`);
-      const transferText = `${lesson.transferTask.contextDe ?? ''}${lesson.transferTask.instructionDe}`;
+      const stepTexts = lesson.steps.map((s) => `${s.context ?? ''}${s.instruction}`);
+      const transferText = `${lesson.transferTask.context ?? ''}${lesson.transferTask.instruction}`;
       expect(stepTexts).not.toContain(transferText);
     }
   });

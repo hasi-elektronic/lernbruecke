@@ -1,10 +1,13 @@
-export type UiLanguage = 'de' | 'tr';
+import type { SupportLanguage } from '../types/content';
+
+/** Sprache der Elternoberfläche. */
+export type UiLanguage = 'de' | 'en' | 'es';
 
 export interface ChildProfile {
   nickname: string;
   avatar: string;
-  /** Türkische Hilfe im Kinderbereich anbieten? */
-  turkishHelp: boolean;
+  /** Heimatsprache für die Verständnisbrücke. null = keine Hilfe anbieten. */
+  supportLanguage: SupportLanguage | null;
   createdAt: number;
 }
 
@@ -23,7 +26,8 @@ export interface AttemptRecord {
   /** Beim ersten Versuch korrekt und ohne Hilfe. */
   correctFirstTry: boolean;
   hintsUsed: number;
-  usedTurkishHelp: boolean;
+  /** Wurde die Hilfe in der Heimatsprache benutzt? */
+  usedSupportLanguage: boolean;
   attempts: number;
   timestamp: number;
 }
@@ -40,7 +44,7 @@ export interface LessonCompletion {
   transferFirstTryCorrect: boolean;
 }
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 export interface AppData {
   schemaVersion: number;

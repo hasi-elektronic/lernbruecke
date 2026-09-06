@@ -5,9 +5,10 @@ deutsche Matheaufgabe eigentlich von mir will** — mit optionaler türkischer H
 
 Arbeitstitel. Kein bestehendes Logo, kein fremdes Design übernommen.
 
-- Kinderbereich: durchgehend Deutsch
-- Türkische Erklärung: erscheint nur, wenn das Kind sie antippt
-- Elternoberfläche: umschaltbar Deutsch / Türkisch
+- Kinderbereich: durchgehend in der **Zielsprache** des Content-Packs (aktuell Deutsch)
+- Hilfssprache (Heimatsprache): **Türkisch, Spanisch oder Englisch** – erscheint nur,
+  wenn das Kind sie antippt, und ersetzt nie die Zielsprache
+- Elternoberfläche: **Deutsch / English / Español**
 - Alle Daten bleiben auf dem Gerät. Kein Konto, keine Cloud, keine Zahlungen, kein Tracking
 
 ---
@@ -102,6 +103,28 @@ Kontext**, die ohne Hilfe gewertet wird. Zahlenraum bis 20.
 
 Bewusst **nicht** gelehrt: Signalwortregeln wie „mehr heißt plus". Stattdessen zeigt
 jede Aufgabe die Handlung („Ben bekommt 3 Murmeln, Minas Menge wird kleiner").
+
+### Mehrsprachigkeit: drei getrennte Ebenen
+
+| Ebene | Wo eingestellt | Aktuell |
+|---|---|---|
+| **Zielsprache** (Sprache der Aufgaben) | Content-Pack, `targetLocale` | `de-DE` |
+| **Hilfssprache** (Heimatsprache) | Elternbereich, pro Kind | `tr`, `es`, `en` oder keine |
+| **Elternoberfläche** | Elternbereich | `de`, `en`, `es` |
+
+Diese drei sind bewusst unabhängig: Eine Familie kann die Elternoberfläche auf
+Englisch stellen und dem Kind trotzdem spanische Hilfe geben, während die
+Aufgaben deutsch bleiben.
+
+### Neue Hilfssprache hinzufügen
+
+1. `src/content/support/<lang>.ts` nach dem Muster von `tr.ts` anlegen
+   (Schlüssel = Übungs-ID, Wert = `{ hint, explanation }`).
+2. In `src/content/support/index.ts` in `supportPacks` und `supportLanguages` eintragen.
+3. `npm run test` — der Inhaltstest prüft, dass **jede** Übung abgedeckt ist und
+   keine verwaisten Einträge existieren.
+
+Kein Code im Lektionsmotor ändert sich.
 
 ### Neue Lektion hinzufügen
 

@@ -1,9 +1,9 @@
 import { useMemo, useRef, useState } from 'react';
 import { getSkill, lessons } from '../content';
 import { buildParentAdvice, completedLessonIds, hintUsageRate, skillStats } from '../logic/progress';
-import { t } from '../i18n/strings';
+import { t, uiLanguages } from '../i18n/strings';
 import { useAppState } from '../state';
-import type { UiLanguage } from '../data/types';
+import { supportLanguages } from '../content/support';
 
 /** Einfache Rechenschranke: hält Kinder ab, ist KEINE Anmeldung. */
 export function ParentGate({ onPass, onCancel }: { onPass: () => void; onCancel: () => void }) {
@@ -81,7 +81,7 @@ export function ParentDashboard({ onBack, onEditProfile }: { onBack: () => void;
     () =>
       buildParentAdvice(data.attempts, data.completions, (id) => {
         const skill = getSkill(id);
-        return { de: skill?.labelDe ?? id, tr: skill?.labelTr ?? id };
+        return skill?.label ?? { de: id, en: id, es: id };
       }),
     [data.attempts, data.completions],
   );
@@ -147,7 +147,7 @@ export function ParentDashboard({ onBack, onEditProfile }: { onBack: () => void;
                 <li key={stat.skillId}>
                   <div className="flex items-baseline justify-between gap-2">
                     <span className="text-base font-bold text-ink-800">
-                      {lang === 'tr' ? (skill?.labelTr ?? stat.skillId) : (skill?.labelDe ?? stat.skillId)}
+                      {skill?.label[lang] ?? stat.skillId}
                     </span>
                     <span className="text-sm font-bold text-ink-700">
                       {stat.unassisted}/{stat.total}
@@ -166,7 +166,7 @@ export function ParentDashboard({ onBack, onEditProfile }: { onBack: () => void;
         <ul className="space-y-2">
           {advice.map((a) => (
             <li key={a.key} className="rounded-2xl bg-brand-50 p-3 text-base text-ink-800">
-              {lang === 'tr' ? a.tr : a.de}
+              {a[lang]}
             </li>
           ))}
         </ul>
@@ -175,37 +175,50 @@ export function ParentDashboard({ onBack, onEditProfile }: { onBack: () => void;
       <section className="lb-card mb-4 p-5">
         <h2 className="mb-3 text-xl font-extrabold text-ink-900">{s.settingsTitle}</h2>
         <div className="space-y-3">
-          <div className="flex gap-3">
-            {(['de', 'tr'] as UiLanguage[]).map((l) => (
+          <div className="flex flex-wrap gap-3">
+            {uiLanguages.map((l) => (
               <button
-                key={l}
+                key={l.id}
                 type="button"
-                onClick={() => setSettings({ ...data.settings, parentLanguage: l })}
-                aria-pressed={lang === l}
-                className={`lb-tile flex-1 py-3 ${lang === l ? 'border-brand-400 bg-brand-50' : 'border-brand-100'}`}
+                onClick={() => setSettings({ ...data.settings, parentLanguage: l.id })}
+                aria-pressed={lang === l.id}
+                className={`lb-tile flex-1 py-3 ${lang === l.id ? 'border-brand-400 bg-brand-50' : 'border-brand-100'}`}
               >
-                {l === 'de' ? 'Deutsch' : 'Türkçe'}
+                {l.label}
               </button>
             ))}
           </div>
           {data.profile ? (
-            <label className="flex items-start gap-3 rounded-2xl bg-sun-100 p-3">
-              <input
-                type="checkbox"
-                checked={data.profile.turkishHelp}
-                onChange={(e) =>
-                  data.profile && setProfile({ ...data.profile, turkishHelp: e.target.checked })
-                }
-                className="mt-1 h-6 w-6 accent-[#33afe2]"
-              />
-              <span>
-                <span className="block text-base font-bold text-ink-900">{s.turkishHelpLabel}</span>
-                <span className="block text-sm text-ink-700">
-                  {data.profile.turkishHelp ? s.turkishHelpOn : s.turkishHelpOff}
-                </span>
-                <span className="mt-1 block text-sm text-ink-700">{s.turkishHelpIndependent}</span>
-              </span>
-            </label>
+            <fieldset className="rounded-2xl bg-sun-100 p-3">
+              <legend className="text-base font-bold text-ink-900">{s.supportLabel}</legend>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => data.profile && setProfile({ ...data.profile, supportLanguage: null })}
+                  aria-pressed={data.profile.supportLanguage === null}
+                  className={`lb-tile px-3 py-2 ${data.profile.supportLanguage === null ? 'border-brand-400 bg-white' : 'border-white bg-white/60'}`}
+                >
+                  <span className="text-sm font-bold">🚫 {s.supportNone}</span>
+                </button>
+                {supportLanguages.map((sl) => (
+                  <button
+                    key={sl.id}
+                    type="button"
+                    onClick={() => data.profile && setProfile({ ...data.profile, supportLanguage: sl.id })}
+                    aria-pressed={data.profile?.supportLanguage === sl.id}
+                    className={`lb-tile px-3 py-2 ${data.profile?.supportLanguage === sl.id ? 'border-brand-400 bg-white' : 'border-white bg-white/60'}`}
+                  >
+                    <span className="text-sm font-bold">
+                      {sl.flag} {sl.nativeLabel}
+                    </span>
+                  </button>
+                ))}
+              </div>
+              <p className="mt-2 text-sm text-ink-700">
+                {data.profile.supportLanguage ? s.supportOn : s.supportOff}
+              </p>
+              <p className="mt-1 text-sm text-ink-700">{s.supportIndependent}</p>
+            </fieldset>
           ) : null}
           <label className="flex items-center gap-3 rounded-2xl bg-white p-3">
             <input

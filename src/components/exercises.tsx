@@ -20,7 +20,7 @@ interface Props<T extends Exercise> {
 
 function SelectOne({ exercise, answer, onChange, locked }: Props<SelectOneExercise>) {
   return (
-    <div className="grid gap-3" role="radiogroup" aria-label={exercise.instructionDe}>
+    <div className="grid gap-3" role="radiogroup" aria-label={exercise.instruction}>
       {exercise.items.map((item) => {
         const selected = answer === item.id;
         return (
@@ -49,7 +49,7 @@ function SelectOne({ exercise, answer, onChange, locked }: Props<SelectOneExerci
                   {item.emoji}
                 </span>
               ) : null}
-              <span className="text-lg font-semibold text-ink-800">{item.labelDe}</span>
+              <span className="text-lg font-semibold text-ink-800">{item.label}</span>
             </span>
           </button>
         );
@@ -75,7 +75,7 @@ function SelectMultiple({ exercise, answer, onChange, locked }: Props<SelectMult
             key={item.id}
             type="button"
             aria-pressed={isOn}
-            aria-label={item.labelDe}
+            aria-label={item.label}
             disabled={locked}
             onClick={() => toggle(item.id)}
             className={`lb-tile min-w-[6.5rem] flex-1 ${
@@ -88,7 +88,7 @@ function SelectMultiple({ exercise, answer, onChange, locked }: Props<SelectMult
               </span>
             ) : null}
             <span aria-hidden="true" className="mt-1 block text-lg font-bold text-ink-800">
-              {item.labelDe}
+              {item.label}
             </span>
             <span
               aria-hidden="true"
@@ -157,7 +157,7 @@ function SortGroups({ exercise, answer, onChange, locked }: Props<SortGroupsExer
                     {item.emoji}
                   </span>
                 ) : null}
-                <span className="text-lg font-bold text-ink-800">{item.labelDe}</span>
+                <span className="text-lg font-bold text-ink-800">{item.label}</span>
               </button>
             ))
           )}
@@ -179,7 +179,7 @@ function SortGroups({ exercise, answer, onChange, locked }: Props<SortGroupsExer
               className="rounded-3xl border-4 border-dashed border-turq-300 bg-white/70 p-3"
             >
               <div className="mb-2 flex items-center justify-between gap-2">
-                <p className="text-lg font-extrabold text-ink-800">{target.labelDe}</p>
+                <p className="text-lg font-extrabold text-ink-800">{target.label}</p>
                 <button
                   type="button"
                   disabled={locked || !active}
@@ -204,7 +204,7 @@ function SortGroups({ exercise, answer, onChange, locked }: Props<SortGroupsExer
                         {item.emoji}
                       </span>
                     ) : null}
-                    {item.labelDe} ✕
+                    {item.label} ✕
                   </button>
                 ))}
               </div>
@@ -235,8 +235,8 @@ function MoveObjects({ exercise, answer, onChange, locked }: Props<MoveObjectsEx
     onChange(next);
   };
 
-  const poolLabel = isAdd ? exercise.sourceLabelDe : exercise.sourceLabelDe;
-  const targetLabel = exercise.targetLabelDe;
+  const poolLabel = isAdd ? exercise.sourceLabel : exercise.sourceLabel;
+  const targetLabel = exercise.targetLabel;
 
   const Row = ({ count, label, tone }: { count: number; label: string; tone: string }) => (
     <div className={`rounded-3xl border-4 p-3 ${tone}`}>
@@ -263,7 +263,7 @@ function MoveObjects({ exercise, answer, onChange, locked }: Props<MoveObjectsEx
           onClick={() => move(1)}
           className="lb-btn-primary disabled:opacity-40"
         >
-          ⬇︎ 1 {exercise.objectLabelDe} zu {targetLabel}
+          ⬇︎ 1 {exercise.objectLabel} zu {targetLabel}
         </button>
         <button
           type="button"
@@ -276,7 +276,7 @@ function MoveObjects({ exercise, answer, onChange, locked }: Props<MoveObjectsEx
       </div>
       <Row count={target} label={targetLabel} tone="border-turq-300 bg-turq-200/30" />
       <p className="text-center text-base font-bold text-brand-700">
-        Bewegt: {moved} {exercise.objectLabelDe}
+        Bewegt: {moved} {exercise.objectLabel}
       </p>
     </div>
   );
@@ -294,7 +294,7 @@ function NumberInput({ exercise, answer, onChange, locked }: Props<NumberInputEx
   return (
     <div className="space-y-3">
       <label className="block text-center">
-        <span className="block text-base font-bold text-ink-700">Deine Antwort ({exercise.unitDe})</span>
+        <span className="block text-base font-bold text-ink-700">Deine Antwort ({exercise.unit})</span>
         <input
           inputMode="numeric"
           pattern="[0-9]*"
@@ -305,7 +305,7 @@ function NumberInput({ exercise, answer, onChange, locked }: Props<NumberInputEx
             onChange(digits === '' ? null : Number(digits));
           }}
           className="focus-ring mx-auto mt-2 block w-32 rounded-2xl border-4 border-brand-200 bg-white p-3 text-center text-4xl font-extrabold text-ink-900"
-          aria-label={`Antwort in ${exercise.unitDe}`}
+          aria-label={`Antwort in ${exercise.unit}`}
         />
       </label>
       <div className="mx-auto grid max-w-xs grid-cols-5 gap-2">

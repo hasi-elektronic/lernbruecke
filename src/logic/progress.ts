@@ -1,4 +1,4 @@
-import type { AttemptRecord, LessonCompletion } from '../data/types';
+import type { AttemptRecord, LessonCompletion, UiLanguage } from '../data/types';
 import { lessonOrder, lessons } from '../content';
 import type { Lesson } from '../types/content';
 
@@ -61,9 +61,9 @@ export function hintUsageRate(attempts: AttemptRecord[]): number | null {
   return withHint / attempts.length;
 }
 
-export function turkishHelpRate(attempts: AttemptRecord[]): number | null {
+export function supportUsageRate(attempts: AttemptRecord[]): number | null {
   if (attempts.length === 0) return null;
-  return attempts.filter((a) => a.usedTurkishHelp).length / attempts.length;
+  return attempts.filter((a) => a.usedSupportLanguage).length / attempts.length;
 }
 
 const WEAK_THRESHOLD = 0.6;
@@ -116,21 +116,23 @@ export function recommendNextLesson(
 export interface ParentAdvice {
   key: string;
   de: string;
-  tr: string;
+  en: string;
+  es: string;
 }
 
 /** Konkrete, verständliche Hinweise – nur aus echten Daten abgeleitet. */
 export function buildParentAdvice(
   attempts: AttemptRecord[],
   completions: LessonCompletion[],
-  skillLabel: (id: string) => { de: string; tr: string },
+  skillLabel: (id: string) => Record<UiLanguage, string>,
 ): ParentAdvice[] {
   const advice: ParentAdvice[] = [];
   if (completions.length === 0) {
     advice.push({
       key: 'no-data',
       de: 'Noch keine abgeschlossene Lektion. Nach der ersten Lektion erscheinen hier echte Auswertungen.',
-      tr: 'Henüz tamamlanmış ders yok. İlk dersten sonra burada gerçek veriler görünür.',
+      en: 'No lesson completed yet. Real figures appear here after the first lesson.',
+      es: 'Todavía no hay lecciones completadas. Los datos reales aparecen tras la primera lección.',
     });
     return advice;
   }
@@ -145,7 +147,8 @@ export function buildParentAdvice(
     advice.push({
       key: `weak-${s.skillId}`,
       de: `„${label.de}" fällt noch schwer (${s.unassisted} von ${s.total} ohne Hilfe richtig). Diese Lektion in den nächsten Tagen wiederholen.`,
-      tr: `„${label.tr}" konusu henüz zor (${s.total} soruda ${s.unassisted} tanesi yardımsız doğru). Bu dersi önümüzdeki günlerde tekrar edin.`,
+      en: `„${label.en}" is still hard (${s.unassisted} of ${s.total} correct without help). Repeat this lesson in the next few days.`,
+      es: `„${label.es}" todavía cuesta (${s.unassisted} de ${s.total} correctos sin ayuda). Repitan esta lección en los próximos días.`,
     });
   }
 
@@ -157,7 +160,8 @@ export function buildParentAdvice(
     advice.push({
       key: `strong-${strong[0].skillId}`,
       de: `„${label.de}" sitzt: Die Kontrollaufgabe im neuen Kontext wurde ohne Hilfe gelöst.`,
-      tr: `„${label.tr}" oturmuş: Yeni bağlamdaki kontrol sorusu yardımsız çözüldü.`,
+      en: `„${label.en}" is solid: the check task in a new context was solved without help.`,
+      es: `„${label.es}" está afianzado: el ejercicio de control en un contexto nuevo se resolvió sin ayuda.`,
     });
   }
 
@@ -166,16 +170,18 @@ export function buildParentAdvice(
     advice.push({
       key: 'many-hints',
       de: 'Hilfen werden bei über der Hälfte der Aufgaben genutzt. Vor dem Antworten die Aufgabe gemeinsam laut vorlesen lassen.',
-      tr: 'Soruların yarısından fazlasında yardım kullanılıyor. Cevaptan önce soruyu birlikte sesli okutun.',
+      en: 'Hints are used on more than half the tasks. Read the task out loud together before answering.',
+      es: 'Se usan ayudas en más de la mitad de los ejercicios. Lean el enunciado en voz alta juntos antes de responder.',
     });
   }
 
-  const trRate = turkishHelpRate(attempts);
-  if (trRate !== null && trRate > 0.4) {
+  const supportRate = supportUsageRate(attempts);
+  if (supportRate !== null && supportRate > 0.4) {
     advice.push({
-      key: 'many-tr',
-      de: 'Die türkische Erklärung wird oft gebraucht. Die deutschen Schlüsselwörter (markiere, zusammen, noch, mehr) gezielt üben.',
-      tr: 'Türkçe açıklama sık kullanılıyor. Almanca anahtar kelimeleri (markiere, zusammen, noch, mehr) ayrıca çalışın.',
+      key: 'many-support',
+      de: 'Die Hilfe in der Heimatsprache wird oft gebraucht. Die deutschen Schlüsselwörter (markiere, zusammen, noch, mehr) gezielt üben.',
+      en: 'The home-language help is used often. Practise the German key words (markiere, zusammen, noch, mehr) separately.',
+      es: 'La ayuda en el idioma del hogar se usa a menudo. Practiquen aparte las palabras clave en alemán (markiere, zusammen, noch, mehr).',
     });
   }
 
@@ -183,7 +189,8 @@ export function buildParentAdvice(
     advice.push({
       key: 'ok',
       de: 'Die letzten Lektionen liefen stabil. Ein bis zwei kurze Einheiten pro Tag reichen aus.',
-      tr: 'Son dersler istikrarlı geçti. Günde bir-iki kısa çalışma yeterli.',
+      en: 'The recent lessons went steadily. One or two short sessions a day are enough.',
+      es: 'Las últimas lecciones fueron estables. Una o dos sesiones cortas al día son suficientes.',
     });
   }
   return advice;

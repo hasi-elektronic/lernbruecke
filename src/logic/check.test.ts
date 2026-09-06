@@ -4,21 +4,19 @@ import { applyResult, isUnassisted } from './scoring';
 import type { Exercise } from '../types/content';
 
 const base = {
-  hintDe: 'h',
-  hintDetailDe: 'hd',
-  hintTr: 'ht',
-  explanationDe: 'e',
-  explanationTr: 'et',
+  hint: 'h',
+  hintDetail: 'hd',
+  explanation: 'e',
 };
 
 const selectOne: Exercise = {
   ...base,
   id: 'x1',
   interactionType: 'select-one',
-  instructionDe: 'Wähle aus.',
+  instruction: 'Wähle aus.',
   items: [
-    { id: 'a', labelDe: 'A' },
-    { id: 'b', labelDe: 'B' },
+    { id: 'a', label: 'A' },
+    { id: 'b', label: 'B' },
   ],
   correctAnswer: 'b',
 };
@@ -27,11 +25,11 @@ const selectMultiple: Exercise = {
   ...base,
   id: 'x2',
   interactionType: 'select-multiple',
-  instructionDe: 'Markiere alle.',
+  instruction: 'Markiere alle.',
   items: [
-    { id: 'a', labelDe: 'A' },
-    { id: 'b', labelDe: 'B' },
-    { id: 'c', labelDe: 'C' },
+    { id: 'a', label: 'A' },
+    { id: 'b', label: 'B' },
+    { id: 'c', label: 'C' },
   ],
   correctAnswer: ['a', 'c'],
 };
@@ -40,14 +38,14 @@ const sortGroups: Exercise = {
   ...base,
   id: 'x3',
   interactionType: 'sort-groups',
-  instructionDe: 'Ordne zu.',
+  instruction: 'Ordne zu.',
   targets: [
-    { id: 't1', labelDe: 'T1' },
-    { id: 't2', labelDe: 'T2' },
+    { id: 't1', label: 'T1' },
+    { id: 't2', label: 'T2' },
   ],
   items: [
-    { id: 'i1', labelDe: 'I1' },
-    { id: 'i2', labelDe: 'I2' },
+    { id: 'i1', label: 'I1' },
+    { id: 'i2', label: 'I2' },
   ],
   correctAnswer: { i1: 't1', i2: 't2' },
 };
@@ -56,14 +54,14 @@ const moveObjects: Exercise = {
   ...base,
   id: 'x4',
   interactionType: 'move-objects',
-  instructionDe: 'Bewege 3.',
+  instruction: 'Bewege 3.',
   mode: 'remove',
   emoji: '🔵',
-  objectLabelDe: 'Murmel',
+  objectLabel: 'Murmel',
   startCount: 8,
   moveCount: 3,
-  sourceLabelDe: 'Mina',
-  targetLabelDe: 'Ben',
+  sourceLabel: 'Mina',
+  targetLabel: 'Ben',
   correctAnswer: 3,
 };
 
@@ -71,8 +69,8 @@ const numberInput: Exercise = {
   ...base,
   id: 'x5',
   interactionType: 'number-input',
-  instructionDe: 'Wie viele?',
-  unitDe: 'Murmeln',
+  instruction: 'Wie viele?',
+  unit: 'Murmeln',
   correctAnswer: 5,
 };
 
